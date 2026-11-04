@@ -1,7 +1,20 @@
-export const BETTING_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
+export const BETTING_OPTIONS = [
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 100,
+] as const;
 export const DEFAULT_BETTING_INDEX = 0;
 export type BetAmount = (typeof BETTING_OPTIONS)[number];
 export type BaseBetAmount = 1 | 2 | 3 | 4 | 5;
+
+export function getActiveHandCount(bet: BetAmount): number {
+  return Math.min(bet, 10);
+}
+
+export function getPaytableBetAmount(bet: BetAmount): BaseBetAmount {
+  if (bet <= 10) return 1;
+  if (bet <= 40) return 2;
+  if (bet === 50) return 3;
+  return 4;
+}
 
 export const GAME_STATES = {
   Game_Over: "GAME_OVER",

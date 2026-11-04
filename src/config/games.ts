@@ -10,37 +10,13 @@ import {
   HAND_TYPES,
   PAYOUTS_PER_BET,
 } from "./doubleDoubleBonusConfig";
-import { BETTING_OPTIONS, type BaseBetAmount, type BetAmount } from "./gameConfig";
+import type { BaseBetAmount } from "./gameConfig";
 
 export type GameId = "double-double-bonus" | "deuces-wild-double-bonus";
 export type HandRank = string;
-export type GamePayoutTable = Record<
-  BetAmount,
-  Readonly<Record<HandRank, number>>
+export type GamePayoutTable = Readonly<
+  Record<BaseBetAmount, Readonly<Record<HandRank, number>>>
 >;
-type BaseGamePayoutTable = Record<
-  BaseBetAmount,
-  Readonly<Record<HandRank, number>>
->;
-
-function extendPayoutsToTenCredits(
-  payouts: BaseGamePayoutTable,
-): GamePayoutTable {
-  const extended = { ...payouts } as GamePayoutTable;
-
-  for (const bet of BETTING_OPTIONS) {
-    if (bet <= 5) continue;
-
-    extended[bet] = Object.fromEntries(
-      Object.entries(payouts[5]).map(([hand, payout]) => [
-        hand,
-        Math.round((payout * bet) / 5),
-      ]),
-    );
-  }
-
-  return extended;
-}
 
 export interface CardAsset {
   src: string;
@@ -82,7 +58,7 @@ export const GAMES: Record<GameId, GameDefinition> = {
     name: "DOUBLE DBL BONUS",
     image: "DDB.png",
     handNames: HAND_DISPLAY_NAMES,
-    payoutsPerBet: extendPayoutsToTenCredits(PAYOUTS_PER_BET),
+    payoutsPerBet: PAYOUTS_PER_BET,
     multiplierByHand: {
       [HAND_TYPES.ROYAL_FLUSH]: 2,
       [HAND_TYPES.STRAIGHT_FLUSH]: 2,
@@ -106,7 +82,7 @@ export const GAMES: Record<GameId, GameDefinition> = {
     name: "DEUCES WILD DOUBLE BONUS",
     image: "DWDB.png",
     handNames: DEUCES_WILD_HAND_DISPLAY_NAMES,
-    payoutsPerBet: extendPayoutsToTenCredits(DEUCES_WILD_PAYOUTS_PER_BET),
+    payoutsPerBet: DEUCES_WILD_PAYOUTS_PER_BET,
     multiplierByHand: {
       [DEUCES_WILD_HAND_TYPES.ROYAL_FLUSH_NO_DEUCES]: 2,
       [DEUCES_WILD_HAND_TYPES.FOUR_DEUCES_WITH_ACE]: 2,

@@ -15,12 +15,18 @@
     url("/assets/ui/uxbg.png") center / 100% 100% no-repeat;
 }
 
+.game-shell {
+  position: relative;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
 .game-table {
   position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: clamp(24rem, 67dvh, 55rem);
+  height: clamp(20rem, 59dvh, 48rem);
   flex: 0 0 auto;
   overflow: hidden;
   padding: 0.45rem 0.35rem;
@@ -38,7 +44,7 @@
 .ultimate-x-indicator {
   position: absolute;
   right: 0.2rem;
-  bottom: 0.2rem;
+  bottom: 0.1rem;
   z-index: 1;
   display: block;
   width: min(13%, 6rem);
@@ -60,17 +66,17 @@
 
 .play-overlay {
   position: absolute;
-  top: 50%;
+  bottom: 1rem;
   left: 50%;
   z-index: 1;
-  transform: translate(-50%, -50%);
-  width: min(78%, 24rem);
-  min-height: 3.2rem;
+  transform: translateX(-50%);
+  width: min(52%, 24rem);
+  min-height: 3rem;
   border: 0.2rem solid #ffeb00;
   background: #000;
   color: #fff;
   font-family: var(--font-paytable);
-  font-size: clamp(1rem, 5vw, 1.65rem);
+  font-size: clamp(0.8rem, 3.8vw, 1.3rem);
   font-weight: 800;
   cursor: pointer;
   box-shadow: 0 0 0.5rem #000;

@@ -44,7 +44,14 @@ function PaytableModal({
           winningHands={winningHands}
         />
         <div className="paytable-rules">
-          <p>Bet 10 credits per hand to activate the Ultimate X feature.</p>
+          <p>
+            Bets 1–9 play that many hands; bets 10 and higher play all ten.
+          </p>
+          <p>
+            Payouts use 1 coin for bets 1–10, 2 for 20–40, 3 for 50, and 4 for
+            100 credits.
+          </p>
+          <p>Bet 100 credits to activate the Ultimate X feature.</p>
           <p>
             Winning hands award a multiplier to the same row. It applies and
             resets after your next max-bet deal; lower bets leave it queued.

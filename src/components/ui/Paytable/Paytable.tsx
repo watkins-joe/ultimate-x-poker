@@ -1,4 +1,7 @@
-import type { BetAmount } from "../../../config/gameConfig";
+import {
+  getPaytableBetAmount,
+  type BetAmount,
+} from "../../../config/gameConfig";
 import type { GameDefinition, HandRank } from "../../../config/games";
 import "./Paytable.scss";
 
@@ -37,7 +40,7 @@ function Paytable({ game, bet, winningHands, showMultipliers }: PaytableProps) {
                 ? game.multiplierByHand[hand] === undefined
                   ? "-"
                   : `${game.multiplierByHand[hand]}X`
-                : game.payoutsPerBet[bet][hand]}
+                : game.payoutsPerBet[getPaytableBetAmount(bet)][hand]}
             </div>
           ))}
         </div>

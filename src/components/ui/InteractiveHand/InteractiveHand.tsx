@@ -32,6 +32,7 @@ interface InteractiveHandProps {
   game: GameDefinition;
   multipliers: readonly number[];
   results: readonly (HandResult | null)[];
+  activeHandCount: number;
   onCardClick: (positionIndex: number) => void;
 }
 
@@ -44,6 +45,7 @@ function InteractiveHand({
   game,
   multipliers,
   results,
+  activeHandCount,
   onCardClick,
 }: InteractiveHandProps) {
   const holdGestureRef = useRef(new HoldSelectionGesture());
@@ -98,85 +100,97 @@ function InteractiveHand({
   const initialHandIsVisible =
     isInitialDeal || gameState === GAME_STATES.Awaiting_Holds;
 
+  function renderHand(handIndex: number, isCurrentHand: boolean) {
+    const isActiveHand =
+      handIndex >= MULTI_HAND_COUNT - activeHandCount;
+    const hand =
+      isCurrentHand && initialHandIsVisible
+        ? initialHand
+        : (hands[handIndex] ?? createEmptyHand());
+    const result = results[handIndex] ?? null;
+    const queuedMultiplier = multipliers[handIndex] ?? 1;
+    const canSelect = isCurrentHand && gameState === GAME_STATES.Awaiting_Holds;
+    const isWinningHand = result !== null && result.payoutCredits > 0;
+    const paylineFrame = isWinningHand
+      ? `/assets/ui/payline${Math.min(16, Math.max(1, result.multiplierApplied))}_2.gif`
+      : null;
+
+    return (
+      <div
+        className={`multi-hand-row${canSelect ? " is-selectable" : ""}${isActiveHand ? "" : " is-inactive"}`}
+        key={handIndex}
+      >
+        <div className="hand-marker" aria-live="polite">
+          {queuedMultiplier > 1 ? (
+            <>
+              <span>NEXT HAND</span>
+              <strong>{queuedMultiplier}X</strong>
+            </>
+          ) : isCurrentHand && canSelect ? (
+            <span>HOLD</span>
+          ) : null}
+        </div>
+        <div className={`cards${canSelect ? " is-holding" : ""}`}>
+          {hand.map((card, cardIndex) => {
+            const asset =
+              card.cardId === null
+                ? { src: "/assets/cards/back.png", alt: "Card Back" }
+                : game.getCardAsset(card.cardId);
+
+            return (
+              <div
+                className={`card-container${isCurrentHand && card.isHeld ? " is-held" : ""}`}
+                key={cardIndex}
+              >
+                <img
+                  alt={asset.alt}
+                  className="playing-card"
+                  draggable={false}
+                  onPointerDown={(event) =>
+                    canSelect && handleCardPointerDown(cardIndex, event)
+                  }
+                  onPointerEnter={(event) =>
+                    canSelect && handleCardPointerEnter(cardIndex, event)
+                  }
+                  src={asset.src}
+                />
+                {isCurrentHand && card.isHeld && card.cardId !== null && (
+                  <span aria-label="Held" className="hold-badge">
+                    HELD
+                  </span>
+                )}
+              </div>
+            );
+          })}
+          {isWinningHand && paylineFrame && (
+            <div
+              aria-label={`${result.title}, ${result.payoutCredits} credits`}
+              className="winning-hand-overlay"
+              role="status"
+              style={{ backgroundImage: `url("${paylineFrame}")` }}
+            >
+              <span>{result.title.toLowerCase()}</span>
+              <strong>{result.payoutCredits}</strong>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="hands-grid" aria-label="Ten poker hands">
-      {Array.from({ length: MULTI_HAND_COUNT }, (_, handIndex) => {
-        const isCurrentHand =
-          handIndex === MULTI_HAND_COUNT - 1 && initialHandIsVisible;
-        const hand = isCurrentHand ? initialHand : hands[handIndex] ?? createEmptyHand();
-        const result = results[handIndex] ?? null;
-        const queuedMultiplier = multipliers[handIndex] ?? 1;
-        const canSelect = isCurrentHand && gameState === GAME_STATES.Awaiting_Holds;
-        const isWinningHand = result !== null && result.payoutCredits > 0;
-        const paylineFrame = isWinningHand
-          ? `/assets/ui/payline${Math.min(16, Math.max(1, result.multiplierApplied))}_2.gif`
-          : null;
-
-        return (
-          <div
-            className={`multi-hand-row${canSelect ? " is-selectable" : ""}`}
-            key={handIndex}
-          >
-            <div className="hand-marker" aria-live="polite">
-              {queuedMultiplier > 1 ? (
-                <>
-                  <span>NEXT HAND</span>
-                  <strong>{queuedMultiplier}X</strong>
-                </>
-              ) : handIndex === MULTI_HAND_COUNT - 1 && canSelect ? (
-                <span>HOLD</span>
-              ) : null}
-            </div>
-            <div className={`cards${canSelect ? " is-holding" : ""}`}>
-              {hand.map((card, cardIndex) => {
-                const asset =
-                  card.cardId === null
-                    ? { src: "/assets/cards/back.png", alt: "Card Back" }
-                    : game.getCardAsset(card.cardId);
-
-                return (
-                  <div
-                    className={`card-container${isCurrentHand && card.isHeld ? " is-held" : ""}`}
-                    key={cardIndex}
-                  >
-                    <img
-                      alt={asset.alt}
-                      className="playing-card"
-                      draggable={false}
-                      onPointerDown={(event) =>
-                        canSelect && handleCardPointerDown(cardIndex, event)
-                      }
-                      onPointerEnter={(event) =>
-                        canSelect && handleCardPointerEnter(cardIndex, event)
-                      }
-                      src={asset.src}
-                    />
-                    {isCurrentHand && card.isHeld && card.cardId !== null && (
-                      <img
-                        alt="Held"
-                        className="hold-badge"
-                        src="/assets/ui/HOLD.png"
-                      />
-                    )}
-                  </div>
-                );
-              })}
-              {isWinningHand && paylineFrame && (
-                <div
-                  aria-label={`${result.title}, ${result.payoutCredits} credits`}
-                  className="winning-hand-overlay"
-                  role="status"
-                  style={{ backgroundImage: `url("${paylineFrame}")` }}
-                >
-                  <span>{result.title.toLowerCase()}</span>
-                  <strong>{result.payoutCredits}</strong>
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      })}
-    </div>
+    <>
+      <div className="game-table">
+        <div className="hands-grid" aria-label="Nine follow-on hands">
+          {Array.from({ length: MULTI_HAND_COUNT - 1 }, (_, handIndex) =>
+            renderHand(handIndex, false),
+          )}
+        </div>
+      </div>
+      <div className="interactive-hand-area" aria-label="Interactive hand">
+        {renderHand(MULTI_HAND_COUNT - 1, true)}
+      </div>
+    </>
   );
 }
 
