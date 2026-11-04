@@ -35,6 +35,29 @@
     inset 0 0 0.7rem #006aff;
 }
 
+.ultimate-x-indicator {
+  position: absolute;
+  right: 0.2rem;
+  bottom: 0.2rem;
+  z-index: 1;
+  display: block;
+  width: min(13%, 6rem);
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+}
+
 .play-overlay {
   position: absolute;
   top: 50%;

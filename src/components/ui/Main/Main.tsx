@@ -124,6 +124,7 @@ function Main() {
   const canAffordBet = balanceCents >= totalBetCostCents;
   const maxBetCostCents = MAX_BET * MULTI_HAND_COUNT * denominationValueCents;
   const canAffordMaxBet = balanceCents >= maxBetCostCents;
+  const isUltimateXActive = currentBet === MAX_BET;
 
   useEffect(
     () => () => {
@@ -489,11 +490,8 @@ function Main() {
   const roundTitle =
     gameState === GAME_STATES.Awaiting_Holds
       ? "SELECT CARDS TO HOLD"
-      : handResults.some((result) => result !== null)
-        ? winningHandCount > 0
-          ? `${winningHandCount} WINNING HANDS`
-          : "NO WIN"
-        : "";
+      : "";
+  const isRoundResolved = handResults.some((result) => result !== null);
   const isReadyToPlay =
     !isRoundActive &&
     initialHand.every((card) => card.cardId === null) &&
@@ -538,6 +536,26 @@ function Main() {
           results={handResults}
           onCardClick={handleCardClick}
         />
+        <button
+          aria-label={
+            isUltimateXActive
+              ? "Ultimate X bonus active"
+              : "Set bet to 10 credits per hand to activate Ultimate X"
+          }
+          className="ultimate-x-indicator"
+          disabled={isUltimateXActive || isRoundActive}
+          onClick={() => changeBet(MAX_BET)}
+          type="button"
+        >
+          <img
+            alt={
+              isUltimateXActive
+                ? "Ultimate X active"
+                : "Bet max credits to activate the Ultimate X feature"
+            }
+            src={`/assets/ui/${isUltimateXActive ? "bonusActive" : "betMax"}.gif`}
+          />
+        </button>
         {isReadyToPlay && (
           <button
             className="play-overlay"
@@ -551,7 +569,11 @@ function Main() {
       </section>
       <HandTitle gameState={gameState} title={roundTitle} />
       <div id="meters">
-        <WinMeter winCredits={winCredits} />
+        <WinMeter
+          isResolved={isRoundResolved}
+          winCredits={winCredits}
+          winningHandCount={winningHandCount}
+        />
         <CreditMeter
           creditsMode={isCreditsMode}
           balanceCents={displayBalanceCents}
@@ -567,7 +589,7 @@ function Main() {
         isRoundActive={isRoundActive}
         isBetting={isBetting}
         isResetConfirmationActive={isResetConfirmationActive}
-        isUltimateXActive={currentBet === MAX_BET}
+        isUltimateXActive={isUltimateXActive}
         gameName={selectedGame.name}
         canDraw={gameState === GAME_STATES.Awaiting_Holds}
         isDrawing={isDrawing}

@@ -107,6 +107,10 @@ function InteractiveHand({
         const result = results[handIndex] ?? null;
         const queuedMultiplier = multipliers[handIndex] ?? 1;
         const canSelect = isCurrentHand && gameState === GAME_STATES.Awaiting_Holds;
+        const isWinningHand = result !== null && result.payoutCredits > 0;
+        const paylineFrame = isWinningHand
+          ? `/assets/ui/payline${Math.min(16, Math.max(1, result.multiplierApplied))}_2.gif`
+          : null;
 
         return (
           <div
@@ -114,27 +118,12 @@ function InteractiveHand({
             key={handIndex}
           >
             <div className="hand-marker" aria-live="polite">
-              {result ? (
+              {queuedMultiplier > 1 ? (
                 <>
-                  <span className="hand-result-name">{result.title}</span>
-                  {result.payoutCredits > 0 && (
-                    <span className="hand-result-payout">
-                      +{result.payoutCredits} ({result.multiplierApplied}X)
-                    </span>
-                  )}
-                  {queuedMultiplier > 1 && (
-                    <span className="hand-result-multiplier">
-                      NEXT {queuedMultiplier}X
-                    </span>
-                  )}
-                </>
-              ) : queuedMultiplier > 1 ? (
-                <>
-                  <span>NEXT</span>
+                  <span>NEXT HAND</span>
                   <strong>{queuedMultiplier}X</strong>
                 </>
-              ) : handIndex === MULTI_HAND_COUNT - 1 &&
-                gameState === GAME_STATES.Awaiting_Holds ? (
+              ) : handIndex === MULTI_HAND_COUNT - 1 && canSelect ? (
                 <span>HOLD</span>
               ) : null}
             </div>
@@ -146,9 +135,13 @@ function InteractiveHand({
                     : game.getCardAsset(card.cardId);
 
                 return (
-                  <div className="card-container" key={cardIndex}>
+                  <div
+                    className={`card-container${isCurrentHand && card.isHeld ? " is-held" : ""}`}
+                    key={cardIndex}
+                  >
                     <img
                       alt={asset.alt}
+                      className="playing-card"
                       draggable={false}
                       onPointerDown={(event) =>
                         canSelect && handleCardPointerDown(cardIndex, event)
@@ -158,12 +151,27 @@ function InteractiveHand({
                       }
                       src={asset.src}
                     />
-                    {card.isHeld && card.cardId !== null && canSelect && (
-                      <div className="hold-badge">HELD</div>
+                    {isCurrentHand && card.isHeld && card.cardId !== null && (
+                      <img
+                        alt="Held"
+                        className="hold-badge"
+                        src="/assets/ui/HOLD.png"
+                      />
                     )}
                   </div>
                 );
               })}
+              {isWinningHand && paylineFrame && (
+                <div
+                  aria-label={`${result.title}, ${result.payoutCredits} credits`}
+                  className="winning-hand-overlay"
+                  role="status"
+                  style={{ backgroundImage: `url("${paylineFrame}")` }}
+                >
+                  <span>{result.title.toLowerCase()}</span>
+                  <strong>{result.payoutCredits}</strong>
+                </div>
+              )}
             </div>
           </div>
         );

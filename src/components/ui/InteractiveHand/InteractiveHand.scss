@@ -8,11 +8,11 @@
 }
 
 .multi-hand-row {
-  display: grid;
-  grid-template-columns: minmax(3.2rem, 4.5rem) minmax(0, 1fr);
+  position: relative;
+  display: flex;
+  justify-content: center;
   align-items: center;
   min-height: 0;
-  gap: 0.2rem;
 
   &.is-selectable {
     .cards {
@@ -27,6 +27,9 @@
 }
 
 .hand-marker {
+  position: absolute;
+  left: 0;
+  width: 14%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -43,68 +46,79 @@
   strong {
     font-size: clamp(0.8rem, 3vw, 1.1rem);
   }
-
-  .hand-result-name {
-    max-width: 100%;
-    overflow: hidden;
-    color: #fff;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .hand-result-payout {
-    color: #ffeb00;
-    font-size: clamp(0.55rem, 2vw, 0.8rem);
-  }
-
-  .hand-result-multiplier {
-    font-size: clamp(0.45rem, 1.7vw, 0.65rem);
-  }
 }
 
 .cards {
+  position: relative;
   display: flex;
   justify-content: center;
   gap: clamp(0.08rem, 0.35vw, 0.2rem);
-  width: 100%;
+  width: min(72%, 26rem);
   height: 100%;
   min-width: 0;
-  margin-inline: auto;
 }
 
 .card-container {
   display: flex;
+  flex-direction: column;
   position: relative;
   flex: 1;
   min-width: 0;
-  max-width: 4.4rem;
-  max-height: 100%;
-  aspect-ratio: 0.69;
+  height: 100%;
+  overflow: visible;
 
-  img {
+  .playing-card {
     display: block;
     width: 100%;
     height: 100%;
+    min-height: 0;
+    flex: 1;
     object-fit: fill;
     user-select: none;
   }
 
+  &.is-held .playing-card {
+    height: calc(100% - 0.7rem);
+  }
+
   .hold-badge {
-    position: absolute;
-    top: -0.5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    color: white;
-    font-family: monospace;
-    font-size: clamp(0.45rem, 2vw, 0.7rem);
-    font-weight: 800;
+    display: block;
+    width: 100%;
+    height: 0.7rem;
+    flex: 0 0 0.7rem;
+    object-fit: contain;
     pointer-events: none;
-    text-shadow: 1px 1px 0 #000;
   }
 }
 
-@media (min-width: 40rem) {
-  .multi-hand-row {
-    grid-template-columns: 5rem minmax(0, 1fr);
+.winning-hand-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 70%;
+  height: min(3.6rem, 78%);
+  transform: translate(-50%, -50%);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  color: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(0.65rem, 2vw, 0.95rem);
+  line-height: 1.2;
+  text-align: center;
+  text-shadow: 1px 1px 2px #000;
+  pointer-events: none;
+
+  span {
+    text-transform: capitalize;
+  }
+
+  strong {
+    color: #ffeb00;
+    font-size: 0.95em;
   }
 }
