@@ -1,0 +1,72 @@
+.bet {
+  width: 100%;
+  min-height: 1.4em;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: monospace;
+  color: white;
+  text-align: center;
+  font-size: 1.2rem;
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+}
+
+.controls {
+  &--container {
+    display: flex;
+    gap: 0.2rem;
+  }
+
+  &--column {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 0.2rem;
+
+    .denom {
+      text-align: center;
+
+      button {
+        border: 0;
+        padding: 0;
+        background: transparent;
+        cursor: pointer;
+
+        &:disabled {
+          cursor: default;
+        }
+      }
+
+      img {
+        height: 4.5rem;
+      }
+    }
+  }
+}
+
+.game-info {
+  font-family: monospace;
+  color: white;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  .game-name {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:disabled {
+      cursor: default;
+    }
+
+    &.confirming {
+      color: #ffde02;
+    }
+  }
+}

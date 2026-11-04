@@ -1,0 +1,21 @@
+.credit-meter {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  color: #ffe33b;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.credit-meter__value {
+  color: #ffe33b;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-shadow: 1px 1px 0 #8a0000;
+}

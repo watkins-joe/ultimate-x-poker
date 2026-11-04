@@ -1,0 +1,30 @@
+.main-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  gap: 0.5rem;
+  position: relative;
+}
+
+#meters {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.7rem;
+
+  .casino-font {
+    font-size: 2rem;
+    letter-spacing: 1px;
+  }
+}
+
+.app-version {
+  position: fixed;
+  left: 0.75rem;
+  top: calc(env(safe-area-inset-top) + 0.5rem);
+  color: rgba(255, 255, 255, 0.55);
+  font-family: monospace;
+  font-size: 0.25rem;
+  line-height: 1;
+  pointer-events: none;
+}

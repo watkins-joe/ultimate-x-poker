@@ -1,0 +1,26 @@
+.casino-button {
+  appearance: none;
+  background-color: #ffde02;
+  font-family: "Oxanium Extra Bold";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  font-size: 1.5rem;
+  box-shadow:
+    inset 5px 5px 0 #ffef86,
+    inset -5px -5px 0 #a69200;
+  color: #151515;
+  cursor: pointer;
+  border: 1px solid black;
+}
+
+.casino-button:disabled {
+  background-color: #858585;
+  background-image: none;
+  box-shadow:
+    inset 5px 5px 0 #b8b8b8,
+    inset -5px -5px 0 #575757;
+  color: #3c3c3c;
+  cursor: default;
+}

@@ -1,0 +1,7 @@
+.win-meter {
+  visibility: hidden;
+
+  &.is-visible {
+    visibility: visible;
+  }
+}

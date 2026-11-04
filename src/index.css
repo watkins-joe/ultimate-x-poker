@@ -1,0 +1,38 @@
+@font-face {
+  font-family: "CasinoDisplay";
+  src: url("/fonts/PittsbrookSans.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-casino: "CasinoDisplay", Impact, sans-serif;
+}
+
+html {
+  font-family: var(--font-casino);
+  font-weight: 400;
+}
+
+.credits-font {
+  /* Text and Sizing Details */
+  font-size: 3rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #981818; /* Authentic bright retro orange */
+
+  /* Optional: Squashes the text slightly wider to mimic old 4:3 CRT monitors */
+  /* transform: scaleX(1.1); */
+  display: inline-block;
+
+  /* Layered retro flat drop shadow effect (Black border + deep red shadow) */
+  text-shadow:
+    -2px -2px 0 #fed302,
+    2px -2px 0 #fed302,
+    -2px 2px 0 #fed302,
+    2px 2px 0 #fed302,
+    1px 2px 0 #981818; /* Deep red-orange trailing shadow block */
+
+  letter-spacing: 5px;
+}

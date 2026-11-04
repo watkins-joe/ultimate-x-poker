@@ -1,0 +1,70 @@
+@font-face {
+  font-family: "CasinoDisplay";
+  src: url("/fonts/PittsbrookSans.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Eurostile Black";
+  src: url("/fonts/EurostileBlackRegular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Oxanium Extra Bold";
+  src: url("/fonts/Oxanium-ExtraBold.ttf") format("truetype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-casino: "CasinoDisplay", Impact, sans-serif;
+  --font-paytable: "Eurostile Black", Impact, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+html {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 400;
+  background-color: #1013ea;
+}
+
+.casino-font {
+  /* Text and Sizing Details */
+  font-size: 3rem;
+  font-weight: 900;
+  font-family: "CasinoDisplay";
+  text-transform: uppercase;
+  color: #b61b26; /* Authentic bright retro orange */
+
+  /* Optional: Squashes the text slightly wider to mimic old 4:3 CRT monitors */
+  /* transform: scaleX(1.1); */
+  display: inline-block;
+
+  /* Layered retro flat drop shadow effect (Black border + deep red shadow) */
+  text-shadow:
+    -2px -2px 0 #ffe33b,
+    2px -2px 0 #ffe33b,
+    -2px 2px 0 #ffe33b,
+    2px 2px 0 #ffe33b,
+    1px 2px 0 #dd0000; /* Deep red-orange trailing shadow block */
+
+  letter-spacing: 5px;
+}

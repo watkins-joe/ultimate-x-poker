@@ -1,0 +1,31 @@
+.denom-options {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.denom-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem;
+  border: 2px solid transparent;
+  border-radius: 0.4rem;
+  background: transparent;
+  cursor: pointer;
+
+  img {
+    display: block;
+    height: 3rem;
+  }
+
+  &.is-selected {
+    border-color: #ffde02;
+  }
+}
+
+.denom-modal > .casino-button {
+  min-height: 3rem;
+}

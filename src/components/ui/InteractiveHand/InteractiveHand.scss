@@ -1,0 +1,37 @@
+.cards {
+  display: flex;
+  gap: 0.1rem;
+  position: relative;
+
+  img {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    user-select: none;
+  }
+}
+
+.cards.is-holding {
+  touch-action: none;
+  user-select: none;
+}
+
+.card-container {
+  display: flex;
+  position: relative;
+  flex: 1;
+  min-width: 0;
+
+  .hold-badge {
+    position: absolute;
+    top: -1.2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-family: monospace;
+    font-weight: 800;
+    pointer-events: none;
+    font-size: 1rem;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+  }
+}
