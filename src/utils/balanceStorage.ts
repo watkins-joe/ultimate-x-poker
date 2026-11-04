@@ -1,9 +1,9 @@
 import { DENOMINATIONS, type Denomination } from "../config/gameConfig";
 import { GAMES, type GameId } from "../config/games";
 
-export const BALANCE_STORAGE_KEY = "videoPoker.balanceCents";
-export const DENOMINATION_STORAGE_KEY = "videoPoker.denomination";
-export const SELECTED_GAME_STORAGE_KEY = "videoPoker.selectedGame";
+export const BALANCE_STORAGE_KEY = "ultimate-x-poker.balanceCents";
+export const DENOMINATION_STORAGE_KEY = "ultimate-x-poker.denomination";
+export const SELECTED_GAME_STORAGE_KEY = "ultimate-x-poker.selectedGame";
 
 type BalanceStorage = Pick<Storage, "getItem" | "setItem">;
 

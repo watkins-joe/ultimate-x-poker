@@ -4,11 +4,18 @@ import "./Modal.scss";
 interface ModalProps {
   title: string;
   className?: string;
+  showCloseButton?: boolean;
   onClose: () => void;
   children: React.ReactNode;
 }
 
-function Modal({ title, className = "", onClose, children }: ModalProps) {
+function Modal({
+  title,
+  className = "",
+  showCloseButton = false,
+  onClose,
+  children,
+}: ModalProps) {
   const titleId = useId();
 
   useEffect(() => {
@@ -35,6 +42,16 @@ function Modal({ title, className = "", onClose, children }: ModalProps) {
         <h2 className="modal-title" id={titleId}>
           {title}
         </h2>
+        {showCloseButton && (
+          <button
+            aria-label="Close dialog"
+            className="modal-close"
+            onClick={onClose}
+            type="button"
+          >
+            ×
+          </button>
+        )}
         {children}
       </section>
     </div>

@@ -1,4 +1,4 @@
-import type { BetAmount } from "./gameConfig";
+import type { BaseBetAmount } from "./gameConfig";
 
 export const DEUCES_WILD_HAND_TYPES = {
   ROYAL_FLUSH_NO_DEUCES: "royal_flush_no_deuces",
@@ -100,7 +100,7 @@ function getPayoutsForBet(betIndex: number): Record<DeucesWildHand, number> {
 }
 
 export const DEUCES_WILD_PAYOUTS_PER_BET: Record<
-  BetAmount,
+  BaseBetAmount,
   Record<DeucesWildHand, number>
 > = {
   1: getPayoutsForBet(0),

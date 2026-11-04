@@ -13,10 +13,12 @@ import {
   GAMES,
   type GameDefinition,
   type GameId,
-  type HandRank,
 } from "../../../config/games";
 import {
+  createEmptyHand,
+  createEmptyMultiHand,
   INITIAL_HAND_STATE,
+  MULTI_HAND_COUNT,
   type INITIAL_HAND_STATE_TYPE,
 } from "../../../config/hands";
 import {
@@ -33,24 +35,23 @@ import { CreditMeter } from "../CreditsCounter/CreditsCounter";
 import DenomModal from "../DenomModal/DenomModal";
 import GameMenu from "../GameMenu/GameMenu";
 import HandTitle from "../HandTitle/HandTitle";
-import InteractiveHand from "../InteractiveHand/InteractiveHand";
-import Paytable from "../Paytable/Paytable";
+import InteractiveHand, {
+  type HandResult,
+} from "../InteractiveHand/InteractiveHand";
+import PaytableModal from "../Paytable/PaytableModal";
 import WinMeter from "../WinMeter/WinMeter";
 import "./Main.scss";
+
 const DEFAULT_DENOMINATION: Denomination = "25c";
 const STARTING_BALANCE_CENTS = 100_000;
 const DEAL_CARD_DELAY_MS = 120;
-const BET_COLUMN_DELAY_MS = 180;
+const DRAW_CARD_DELAY_MS = 35;
+const BET_COLUMN_DELAY_MS = 120;
 const RESET_CONFIRMATION_TIMEOUT_MS = 5000;
 const BASE_PAYOUT_COUNT_UP_MS = 500;
 const PAYOUT_COUNT_UP_PER_CREDIT_MS = 8;
 const MAX_PAYOUT_COUNT_UP_MS = 4000;
-
-interface HandResult {
-  rank: HandRank;
-  title: string;
-  payoutCredits: number;
-}
+const MAX_BET = BETTING_OPTIONS[BETTING_OPTIONS.length - 1];
 
 function getInitialBalanceCents(): number {
   try {
@@ -80,7 +81,7 @@ function getInitialGame(): GameId {
 }
 
 function Main() {
-  const [isCreditsMode, setIsCreditsMode] = useState(false);
+  const [isCreditsMode, setIsCreditsMode] = useState(true);
   const [selectedGameId, setSelectedGameId] = useState<GameId>(getInitialGame);
   const [denomination, setDenomination] = useState<Denomination>(
     getInitialDenomination,
@@ -92,18 +93,23 @@ function Main() {
   const [displayBalanceCents, setDisplayBalanceCents] = useState(balanceCents);
   const [winCredits, setWinCredits] = useState(0);
   const [gameState, setGameState] = useState<GameState>(GAME_STATES.Game_Over);
-  const [handState, setHandState] = useState<INITIAL_HAND_STATE_TYPE>(() =>
-    INITIAL_HAND_STATE.map((card) => ({ ...card })),
+  const [initialHand, setInitialHand] = useState<INITIAL_HAND_STATE_TYPE>(() =>
+    createEmptyHand(),
   );
-  const [handResult, setHandResult] = useState<HandResult | null>(null);
+  const [handsState, setHandsState] =
+    useState<INITIAL_HAND_STATE_TYPE[]>(createEmptyMultiHand);
+  const [multipliers, setMultipliers] = useState<number[]>(
+    () => Array(MULTI_HAND_COUNT).fill(1),
+  );
+  const [handResults, setHandResults] = useState<(HandResult | null)[]>(
+    () => Array(MULTI_HAND_COUNT).fill(null),
+  );
+  const [isInitialDeal, setIsInitialDeal] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
   const [isBetting, setIsBetting] = useState(false);
   const [activeModal, setActiveModal] = useState<
-    "denomination" | "game-selection" | null
+    "denomination" | "game-selection" | "paytable" | null
   >(null);
-  const [activeBetColumn, setActiveBetColumn] = useState<BetAmount | null>(
-    BETTING_OPTIONS[DEFAULT_BETTING_INDEX],
-  );
   const dealTimeoutRef = useRef<number | null>(null);
   const payoutAnimationFrameRef = useRef<number | null>(null);
   const resetConfirmationTimeoutRef = useRef<number | null>(null);
@@ -113,10 +119,11 @@ function Main() {
 
   const denominationValueCents = DENOMINATIONS[denomination].valueCents;
   const selectedGame = GAMES[selectedGameId];
-  const betCostCents = currentBet * denominationValueCents;
-  const canAffordBet = balanceCents >= betCostCents;
-  const maxBet = BETTING_OPTIONS[BETTING_OPTIONS.length - 1];
-  const canAffordMaxBet = balanceCents >= maxBet * denominationValueCents;
+  const totalBetCostCents =
+    currentBet * MULTI_HAND_COUNT * denominationValueCents;
+  const canAffordBet = balanceCents >= totalBetCostCents;
+  const maxBetCostCents = MAX_BET * MULTI_HAND_COUNT * denominationValueCents;
+  const canAffordMaxBet = balanceCents >= maxBetCostCents;
 
   useEffect(
     () => () => {
@@ -158,16 +165,8 @@ function Main() {
   }, [selectedGameId]);
 
   function changeBet(amount: BetAmount) {
-    if (
-      gameState !== GAME_STATES.Game_Over ||
-      isDrawing ||
-      isBetting ||
-      isCountingPayout
-    ) {
-      return;
-    }
+    if (isRoundActive) return;
     setCurrentBet(amount);
-    setActiveBetColumn(amount);
   }
 
   function toggleCreditsMode() {
@@ -195,31 +194,33 @@ function Main() {
     setDisplayBalanceCents(STARTING_BALANCE_CENTS);
   }
 
-  function showCards(
+  function showInitialCards(
     cards: INITIAL_HAND_STATE_TYPE,
-    onComplete: (finalCards: INITIAL_HAND_STATE_TYPE) => void,
+    onComplete: () => void,
   ) {
-    const hiddenCards = cards.map((card) =>
-      card.isHeld ? { ...card } : { cardId: null, isHeld: false },
+    setInitialHand(
+      cards.map((card) =>
+        card.isHeld ? { ...card } : { cardId: null, isHeld: false },
+      ),
     );
+    setIsInitialDeal(true);
+    setIsDrawing(true);
+
     const cardsToReveal = cards.flatMap((card, index) =>
       card.isHeld ? [] : [index],
     );
-
-    setHandState(hiddenCards);
-    setIsDrawing(true);
-
     let revealIndex = 0;
     const revealNext = () => {
       const cardIndex = cardsToReveal[revealIndex];
       if (cardIndex === undefined) {
         dealTimeoutRef.current = null;
         setIsDrawing(false);
-        onComplete(cards);
+        setIsInitialDeal(false);
+        onComplete();
         return;
       }
 
-      setHandState((current) =>
+      setInitialHand((current) =>
         current.map((card, index) =>
           index === cardIndex ? { ...cards[cardIndex] } : card,
         ),
@@ -234,10 +235,59 @@ function Main() {
     revealNext();
   }
 
+  function showHands(
+    hands: INITIAL_HAND_STATE_TYPE[],
+    onComplete: () => void,
+  ) {
+    const hiddenHands = hands.map((hand) =>
+      hand.map((card) =>
+        card.isHeld ? { ...card } : { cardId: null, isHeld: false },
+      ),
+    );
+    const cardsToReveal = hands.flatMap((hand, handIndex) =>
+      hand.flatMap((card, cardIndex) =>
+        card.isHeld ? [] : [{ handIndex, cardIndex }],
+      ),
+    );
+
+    setHandsState(hiddenHands);
+    setIsDrawing(true);
+    let revealIndex = 0;
+    const revealNext = () => {
+      const nextCard = cardsToReveal[revealIndex];
+      if (nextCard === undefined) {
+        dealTimeoutRef.current = null;
+        setIsDrawing(false);
+        onComplete();
+        return;
+      }
+
+      setHandsState((current) =>
+        current.map((hand, handIndex) =>
+          handIndex !== nextCard.handIndex
+            ? hand
+            : hand.map((card, cardIndex) =>
+                cardIndex === nextCard.cardIndex
+                  ? { ...hands[handIndex][cardIndex] }
+                  : card,
+              ),
+        ),
+      );
+      revealIndex += 1;
+      dealTimeoutRef.current = window.setTimeout(
+        revealNext,
+        DRAW_CARD_DELAY_MS,
+      );
+    };
+
+    revealNext();
+  }
+
   function getHandResult(
     cards: INITIAL_HAND_STATE_TYPE,
-    bet: BetAmount = currentBet,
-    game: GameDefinition = selectedGame,
+    bet: BetAmount,
+    game: GameDefinition,
+    multiplier: number,
   ): HandResult | null {
     const cardIds = cards.flatMap((card) =>
       card.cardId === null ? [] : [card.cardId],
@@ -245,18 +295,17 @@ function Main() {
     if (cardIds.length !== INITIAL_HAND_STATE.length) return null;
 
     const rank = game.evaluateHand(cardIds);
-    const payoutCredits = game.payoutsPerBet[bet][rank];
-    return payoutCredits === undefined
-      ? null
-      : {
-          rank,
-          title: game.handNames[rank],
-          payoutCredits,
-        };
+    const basePayout = game.payoutsPerBet[bet][rank] ?? 0;
+    return {
+      rank,
+      title: game.handNames[rank] ?? "NO WIN",
+      payoutCredits: basePayout * multiplier,
+      multiplierApplied: multiplier,
+    };
   }
 
   function handleDeal(bet: BetAmount = currentBet) {
-    const wagerCostCents = bet * denominationValueCents;
+    const wagerCostCents = bet * MULTI_HAND_COUNT * denominationValueCents;
     if (
       gameState !== GAME_STATES.Game_Over ||
       isDrawing ||
@@ -271,41 +320,36 @@ function Main() {
     setBalanceCents((balance) => balance - wagerCostCents);
     setDisplayBalanceCents((balance) => balance - wagerCostCents);
     setWinCredits(0);
-    setHandResult(null);
+    setHandResults(Array(MULTI_HAND_COUNT).fill(null));
+    setInitialHand(createEmptyHand());
+    setHandsState(createEmptyMultiHand());
     setGameState(GAME_STATES.Game_Over);
-    setHandState(INITIAL_HAND_STATE.map((card) => ({ ...card })));
-
-    setActiveBetColumn(null);
     setIsBetting(true);
 
     const dealCards = () => {
       setIsBetting(false);
-      const dealtCards = shuffle(CARDS)
+      const dealtHand = shuffle(CARDS)
         .slice(0, INITIAL_HAND_STATE.length)
-        .map((cardId) => ({
-          cardId,
-          isHeld: false,
-        }));
+        .map((cardId) => ({ cardId, isHeld: false }));
 
-      showCards(dealtCards, () => {
-        setHandResult(getHandResult(dealtCards, bet, selectedGame));
+      showInitialCards(dealtHand, () => {
         setGameState(GAME_STATES.Awaiting_Holds);
       });
     };
 
     const highlightBetColumn = (highlightedBet: BetAmount) => {
-      setActiveBetColumn(highlightedBet);
       dealTimeoutRef.current = window.setTimeout(() => {
         if (highlightedBet === bet) {
           dealCards();
+          return;
+        }
+
+        const nextBet =
+          BETTING_OPTIONS[BETTING_OPTIONS.indexOf(highlightedBet) + 1];
+        if (nextBet === undefined) {
+          dealCards();
         } else {
-          const nextBet =
-            BETTING_OPTIONS[BETTING_OPTIONS.indexOf(highlightedBet) + 1];
-          if (nextBet === undefined) {
-            dealCards();
-          } else {
-            highlightBetColumn(nextBet);
-          }
+          highlightBetColumn(nextBet);
         }
       }, BET_COLUMN_DELAY_MS);
     };
@@ -322,29 +366,55 @@ function Main() {
       return;
     }
 
-    const dealtCardIds = new Set(
-      handState.flatMap((card) => (card.cardId === null ? [] : [card.cardId])),
+    const initialCardIds = new Set(
+      initialHand.flatMap((card) =>
+        card.cardId === null ? [] : [card.cardId],
+      ),
     );
-    const replacementCards = shuffle(
-      CARDS.filter((cardId) => !dealtCardIds.has(cardId)),
-    );
-    const finalHand = handState.map((card) =>
-      card.isHeld
-        ? { ...card }
-        : { cardId: replacementCards.pop() ?? null, isHeld: false },
-    );
+    const finalHands = Array.from({ length: MULTI_HAND_COUNT }, () => {
+      const replacementCards = shuffle(
+        CARDS.filter((cardId) => !initialCardIds.has(cardId)),
+      );
+      return initialHand.map((card) =>
+        card.isHeld
+          ? { ...card }
+          : { cardId: replacementCards.pop() ?? null, isHeld: false },
+      );
+    });
 
-    setHandResult(null);
+    setHandResults(Array(MULTI_HAND_COUNT).fill(null));
     setWinCredits(0);
-    showCards(finalHand, (drawnCards) => {
-      const result = getHandResult(drawnCards);
-      const payoutCents = (result?.payoutCredits ?? 0) * denominationValueCents;
+    setGameState(GAME_STATES.Game_Over);
 
-      setHandResult(result);
+    showHands(finalHands, () => {
+      const bonusIsActive = currentBet === MAX_BET;
+      const results = finalHands.map((hand, handIndex) =>
+        getHandResult(
+          hand,
+          currentBet,
+          selectedGame,
+          bonusIsActive ? multipliers[handIndex] ?? 1 : 1,
+        ),
+      );
+      const totalWinCredits = results.reduce(
+        (total, result) => total + (result?.payoutCredits ?? 0),
+        0,
+      );
+
+      setHandResults(results);
+      if (bonusIsActive) {
+        setMultipliers(
+          results.map((result) =>
+            result?.payoutCredits
+              ? selectedGame.multiplierByHand[result.rank] ?? 1
+              : 1,
+          ),
+        );
+      }
+
+      const payoutCents = totalWinCredits * denominationValueCents;
       setBalanceCents((balance) => balance + payoutCents);
-      setGameState(GAME_STATES.Game_Over);
-
-      if (!result || payoutCents === 0) {
+      if (payoutCents === 0) {
         setWinCredits(0);
         setIsCountingPayout(false);
         return;
@@ -355,7 +425,7 @@ function Main() {
       const duration = Math.min(
         MAX_PAYOUT_COUNT_UP_MS,
         BASE_PAYOUT_COUNT_UP_MS +
-          result.payoutCredits * PAYOUT_COUNT_UP_PER_CREDIT_MS,
+          totalWinCredits * PAYOUT_COUNT_UP_PER_CREDIT_MS,
       );
       setIsCountingPayout(true);
 
@@ -364,14 +434,14 @@ function Main() {
         setDisplayBalanceCents(
           Math.round(startingBalanceCents + payoutCents * progress),
         );
-        setWinCredits(Math.round(result.payoutCredits * progress));
+        setWinCredits(Math.round(totalWinCredits * progress));
 
         if (progress < 1) {
           payoutAnimationFrameRef.current = requestAnimationFrame(countUp);
         } else {
           payoutAnimationFrameRef.current = null;
           setDisplayBalanceCents(startingBalanceCents + payoutCents);
-          setWinCredits(result.payoutCredits);
+          setWinCredits(totalWinCredits);
           setIsCountingPayout(false);
         }
       };
@@ -382,30 +452,23 @@ function Main() {
 
   function handleCardClick(positionIndex: number) {
     if (gameState !== GAME_STATES.Awaiting_Holds || isDrawing) return;
-    setHandState((cards) =>
+    setInitialHand((cards) =>
       cards.map((card, index) =>
         index === positionIndex ? { ...card, isHeld: !card.isHeld } : card,
       ),
     );
   }
 
-  function handleDenomClick() {
-    setActiveModal("denomination");
-  }
-
-  function handleGameMenuClick() {
-    setActiveModal("game-selection");
-  }
-
   function handleGameSelect(gameId: GameId) {
     if (isRoundActive) return;
 
     setSelectedGameId(gameId);
-    setHandResult(null);
+    setHandResults(Array(MULTI_HAND_COUNT).fill(null));
+    setInitialHand(createEmptyHand());
+    setHandsState(createEmptyMultiHand());
+    setMultipliers(Array(MULTI_HAND_COUNT).fill(1));
     setWinCredits(0);
     setGameState(GAME_STATES.Game_Over);
-    setHandState(INITIAL_HAND_STATE.map((card) => ({ ...card })));
-    setActiveBetColumn(currentBet);
     setActiveModal(null);
   }
 
@@ -419,6 +482,22 @@ function Main() {
     isDrawing ||
     isBetting ||
     isCountingPayout;
+  const winningHands = handResults.flatMap((result) =>
+    result && result.payoutCredits > 0 ? [result.rank] : [],
+  );
+  const winningHandCount = winningHands.length;
+  const roundTitle =
+    gameState === GAME_STATES.Awaiting_Holds
+      ? "SELECT CARDS TO HOLD"
+      : handResults.some((result) => result !== null)
+        ? winningHandCount > 0
+          ? `${winningHandCount} WINNING HANDS`
+          : "NO WIN"
+        : "";
+  const isReadyToPlay =
+    !isRoundActive &&
+    initialHand.every((card) => card.cardId === null) &&
+    handResults.every((result) => result === null);
 
   return (
     <div className="main-container">
@@ -437,19 +516,40 @@ function Main() {
           onGameSelect={handleGameSelect}
         />
       )}
-      <Paytable
-        game={selectedGame}
-        activeBet={activeBetColumn}
-        winningHand={handResult?.rank ?? null}
-      />
-      <HandTitle gameState={gameState} title={handResult?.title ?? ""} />
-      <InteractiveHand
-        gameState={gameState}
-        handState={[handState]}
-        isDrawing={isDrawing}
-        game={selectedGame}
-        onCardClick={handleCardClick}
-      />
+      {activeModal === "paytable" && (
+        <PaytableModal
+          bet={currentBet}
+          canChangeBet={!isRoundActive}
+          game={selectedGame}
+          winningHands={winningHands}
+          onBetChange={changeBet}
+          onClose={() => setActiveModal(null)}
+        />
+      )}
+      <section className="game-table" aria-label="Ultimate X Poker table">
+        <InteractiveHand
+          gameState={gameState}
+          hands={handsState}
+          initialHand={initialHand}
+          isDrawing={isDrawing}
+          isInitialDeal={isInitialDeal}
+          game={selectedGame}
+          multipliers={multipliers}
+          results={handResults}
+          onCardClick={handleCardClick}
+        />
+        {isReadyToPlay && (
+          <button
+            className="play-overlay"
+            disabled={!canAffordBet}
+            onClick={() => handleDeal()}
+            type="button"
+          >
+            PLAY {currentBet * MULTI_HAND_COUNT} CREDITS
+          </button>
+        )}
+      </section>
+      <HandTitle gameState={gameState} title={roundTitle} />
       <div id="meters">
         <WinMeter winCredits={winCredits} />
         <CreditMeter
@@ -467,13 +567,15 @@ function Main() {
         isRoundActive={isRoundActive}
         isBetting={isBetting}
         isResetConfirmationActive={isResetConfirmationActive}
+        isUltimateXActive={currentBet === MAX_BET}
         gameName={selectedGame.name}
         canDraw={gameState === GAME_STATES.Awaiting_Holds}
         isDrawing={isDrawing}
         onBetChange={changeBet}
         onDeal={handleDeal}
-        onDenomClick={handleDenomClick}
-        onMenuClick={handleGameMenuClick}
+        onDenomClick={() => setActiveModal("denomination")}
+        onMenuClick={() => setActiveModal("game-selection")}
+        onPaytableClick={() => setActiveModal("paytable")}
         onDraw={handleDraw}
         onResetBalance={handleResetBalance}
       />

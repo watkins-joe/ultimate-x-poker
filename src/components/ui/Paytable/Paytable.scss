@@ -1,52 +1,36 @@
 .paytable {
-  font-family: var(--font-paytable);
-  font-size: 0.8rem;
-  background-color: #181767;
-  color: #ffde02;
-  border: 0.1rem solid #ffde02;
   width: 100%;
+  color: #ffeb00;
+  background: #0700ad;
+  border: 2px solid #ffeb00;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(0.7rem, 3.4vw, 1rem);
+  font-weight: 800;
 
   .paytable-columns {
     display: grid;
-    grid-template-columns: 43% repeat(4, 10%) 17%;
-    width: 100%;
-    height: 100%;
+    grid-template-columns: minmax(0, 1fr) 5.2rem;
   }
 
   .paytable-column {
     display: flex;
     flex-direction: column;
-    border-right: 1px solid #ffde02;
-    padding: 0.15rem 0.1rem;
-    white-space: nowrap;
-
-    &:last-child {
-      border-right: 0;
-    }
-
-    &.is-active-bet {
-      background-color: #bc0033;
-      color: #ffde02;
-    }
 
     > div {
-      flex: 1;
-      min-height: 1.1em;
       display: flex;
       align-items: center;
-      justify-content: flex-end;
+      min-height: 1.65em;
+      white-space: nowrap;
     }
   }
 
   .paytable-hands {
-    padding-left: 0.15rem;
+    min-width: 0;
+    padding: 0.1rem 0.2rem 0.1rem 0.25rem;
+    border-right: 2px solid #ffeb00;
 
     .paytable-hand {
       justify-content: flex-start;
-
-      > span.is-winning {
-        color: #fff;
-      }
 
       > span:first-child {
         flex: none;
@@ -55,18 +39,22 @@
 
     .paytable-leader {
       flex: 1;
-      min-width: 0.25rem;
-      margin-left: 0.15rem;
-      margin-top: 0.3rem;
+      min-width: 0.2rem;
+      margin: 0.25rem 0.15rem 0;
       border-bottom: 2px dotted currentColor;
     }
   }
 
-  .paytable-column:last-child {
-    padding-right: 0.15rem;
+  .paytable-values {
+    padding: 0.1rem 0.25rem;
+    background: #dc0000;
+
+    > div {
+      justify-content: flex-end;
+    }
   }
 
-  .paytable-payout.is-winning {
+  .is-winning {
     color: #fff;
   }
 }

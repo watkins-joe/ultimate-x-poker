@@ -1,22 +1,75 @@
-.cards {
-  display: flex;
-  gap: 0.1rem;
-  position: relative;
-  justify-content: flex-end;
-  align-self: center;
-  max-width: 17rem;
+.hands-grid {
+  display: grid;
+  grid-template-rows: repeat(10, minmax(0, 1fr));
+  gap: clamp(0.1rem, 0.5vh, 0.35rem);
+  width: 100%;
+  min-height: 0;
+  flex: 1;
+}
 
-  img {
-    display: block;
-    width: 100%;
-    min-width: 0;
-    user-select: none;
+.multi-hand-row {
+  display: grid;
+  grid-template-columns: minmax(3.2rem, 4.5rem) minmax(0, 1fr);
+  align-items: center;
+  min-height: 0;
+  gap: 0.2rem;
+
+  &.is-selectable {
+    .cards {
+      touch-action: none;
+      user-select: none;
+    }
+
+    .card-container {
+      cursor: pointer;
+    }
   }
 }
 
-.cards.is-holding {
-  touch-action: none;
-  user-select: none;
+.hand-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  color: #ffeb00;
+  font-family: var(--font-paytable);
+  font-size: clamp(0.45rem, 1.8vw, 0.7rem);
+  font-weight: 800;
+  line-height: 1.05;
+  text-align: center;
+  text-shadow: 1px 1px 1px #000;
+
+  strong {
+    font-size: clamp(0.8rem, 3vw, 1.1rem);
+  }
+
+  .hand-result-name {
+    max-width: 100%;
+    overflow: hidden;
+    color: #fff;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .hand-result-payout {
+    color: #ffeb00;
+    font-size: clamp(0.55rem, 2vw, 0.8rem);
+  }
+
+  .hand-result-multiplier {
+    font-size: clamp(0.45rem, 1.7vw, 0.65rem);
+  }
+}
+
+.cards {
+  display: flex;
+  justify-content: center;
+  gap: clamp(0.08rem, 0.35vw, 0.2rem);
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  margin-inline: auto;
 }
 
 .card-container {
@@ -24,17 +77,34 @@
   position: relative;
   flex: 1;
   min-width: 0;
+  max-width: 4.4rem;
+  max-height: 100%;
+  aspect-ratio: 0.69;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    user-select: none;
+  }
 
   .hold-badge {
     position: absolute;
-    top: -1.2rem;
+    top: -0.5rem;
     left: 50%;
     transform: translateX(-50%);
     color: white;
     font-family: monospace;
+    font-size: clamp(0.45rem, 2vw, 0.7rem);
     font-weight: 800;
     pointer-events: none;
-    font-size: 1rem;
-    text-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+    text-shadow: 1px 1px 0 #000;
+  }
+}
+
+@media (min-width: 40rem) {
+  .multi-hand-row {
+    grid-template-columns: 5rem minmax(0, 1fr);
   }
 }

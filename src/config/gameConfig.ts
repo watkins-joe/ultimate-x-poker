@@ -1,6 +1,7 @@
-export const BETTING_OPTIONS = [1, 2, 3, 4, 5] as const;
+export const BETTING_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 export const DEFAULT_BETTING_INDEX = 0;
 export type BetAmount = (typeof BETTING_OPTIONS)[number];
+export type BaseBetAmount = 1 | 2 | 3 | 4 | 5;
 
 export const GAME_STATES = {
   Game_Over: "GAME_OVER",

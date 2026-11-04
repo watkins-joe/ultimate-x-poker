@@ -16,6 +16,7 @@ interface ControlsProps {
   isRoundActive: boolean;
   isBetting: boolean;
   isResetConfirmationActive: boolean;
+  isUltimateXActive: boolean;
   gameName: GameDefinition["name"];
   canDraw: boolean;
   isDrawing: boolean;
@@ -25,6 +26,7 @@ interface ControlsProps {
   onResetBalance: () => void;
   onDenomClick: () => void;
   onMenuClick: () => void;
+  onPaytableClick: () => void;
 }
 
 function Controls({
@@ -35,6 +37,7 @@ function Controls({
   isRoundActive,
   isBetting,
   isResetConfirmationActive,
+  isUltimateXActive,
   gameName,
   canDraw,
   isDrawing,
@@ -42,6 +45,7 @@ function Controls({
   onDeal,
   onDenomClick,
   onMenuClick,
+  onPaytableClick,
   onDraw,
   onResetBalance,
 }: ControlsProps) {
@@ -56,12 +60,9 @@ function Controls({
             disabled={!canChangeBet}
             text="BET UP"
             onButtonClick={() => {
-              const nextBet = BETTING_OPTIONS[currentBetIndex + 1];
-              if (nextBet === undefined) {
-                onBetChange(1);
-              } else {
-                onBetChange(nextBet);
-              }
+              const nextBet =
+                BETTING_OPTIONS[(currentBetIndex + 1) % BETTING_OPTIONS.length];
+              onBetChange(nextBet);
             }}
           />
           <Button
@@ -85,6 +86,11 @@ function Controls({
               />
             </button>
           </div>
+          <Button
+            disabled={false}
+            text="..."
+            onButtonClick={onPaytableClick}
+          />
         </div>
         <div className="controls--column">
           <Button
@@ -123,7 +129,7 @@ function Controls({
         >
           {isResetConfirmationActive ? "ARE YOU SURE?" : gameName}
         </button>
-        <div>{!isRoundActive && "GAME OVER"}</div>
+        <div>{isUltimateXActive ? "ULTIMATE X ACTIVE" : "GAME OVER"}</div>
       </div>
     </>
   );

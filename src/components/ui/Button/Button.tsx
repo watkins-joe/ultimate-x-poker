@@ -14,7 +14,7 @@ function Button({ disabled, text, onButtonClick }: ButtonProps) {
       disabled={disabled}
       onClick={onButtonClick}
     >
-      {!disabled && text}
+      {text}
     </button>
   );
 }

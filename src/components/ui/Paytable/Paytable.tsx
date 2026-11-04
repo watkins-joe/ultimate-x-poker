@@ -1,48 +1,46 @@
-import { BETTING_OPTIONS, type BetAmount } from "../../../config/gameConfig";
+import type { BetAmount } from "../../../config/gameConfig";
 import type { GameDefinition, HandRank } from "../../../config/games";
 import "./Paytable.scss";
 
 interface PaytableProps {
   game: GameDefinition;
-  activeBet: BetAmount | null;
-  winningHand: HandRank | null;
+  bet: BetAmount;
+  winningHands: readonly HandRank[];
+  showMultipliers: boolean;
 }
 
-function Paytable({ game, activeBet, winningHand }: PaytableProps) {
+function Paytable({ game, bet, winningHands, showMultipliers }: PaytableProps) {
   const payoutHands = Object.keys(game.handNames);
 
   return (
-    <div className="paytable">
+    <div className={`paytable${showMultipliers ? " is-multiplier-table" : ""}`}>
       <div className="paytable-columns">
         <div className="paytable-column paytable-hands">
           {payoutHands.map((hand) => (
             <div className="paytable-hand" key={hand}>
-              <span className={winningHand === hand ? "is-winning" : ""}>
+              <span className={winningHands.includes(hand) ? "is-winning" : ""}>
                 {game.handNames[hand]}
               </span>
               <span className="paytable-leader" aria-hidden="true" />
             </div>
           ))}
         </div>
-        {BETTING_OPTIONS.map((bet) => (
-          <div
-            className={`paytable-column${activeBet === bet ? " is-active-bet" : ""}`}
-            key={bet}
-          >
-            {payoutHands.map((hand) => (
-              <div
-                className={`paytable-payout${
-                  winningHand === hand && activeBet === bet
-                    ? " is-winning"
-                    : ""
-                }`}
-                key={hand}
-              >
-                {game.payoutsPerBet[bet][hand]}
-              </div>
-            ))}
-          </div>
-        ))}
+        <div className="paytable-column paytable-values">
+          {payoutHands.map((hand) => (
+            <div
+              className={`paytable-payout${
+                winningHands.includes(hand) ? " is-winning" : ""
+              }`}
+              key={hand}
+            >
+              {showMultipliers
+                ? game.multiplierByHand[hand] === undefined
+                  ? "-"
+                  : `${game.multiplierByHand[hand]}X`
+                : game.payoutsPerBet[bet][hand]}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

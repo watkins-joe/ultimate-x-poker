@@ -1,20 +1,99 @@
 .main-container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  height: 100%;
-  gap: 0.5rem;
+  justify-content: flex-start;
+  width: min(100%, 48rem);
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: max(0.35rem, env(safe-area-inset-top)) 0.55rem
+    max(0.45rem, env(safe-area-inset-bottom));
+  gap: 0.35rem;
   position: relative;
+  color: #fff;
+  background:
+    linear-gradient(rgba(0, 0, 25, 0.4), rgba(0, 0, 30, 0.85)),
+    url("/assets/ui/uxbg.png") center / 100% 100% no-repeat;
+}
+
+.game-table {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: clamp(24rem, 67dvh, 55rem);
+  flex: 0 0 auto;
+  overflow: hidden;
+  padding: 0.45rem 0.35rem;
+  border: 0.3rem solid #0756ff;
+  background:
+    radial-gradient(ellipse at 50% 45%, rgba(0, 31, 120, 0.18), transparent 70%),
+    #020207;
+  box-shadow:
+    0 0 0.3rem #fff,
+    0 0 0.8rem #006aff,
+    0 0 1.5rem #002aff,
+    inset 0 0 0.7rem #006aff;
+}
+
+.play-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  transform: translate(-50%, -50%);
+  width: min(78%, 24rem);
+  min-height: 3.2rem;
+  border: 0.2rem solid #ffeb00;
+  background: #000;
+  color: #fff;
+  font-family: var(--font-paytable);
+  font-size: clamp(1rem, 5vw, 1.65rem);
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 0 0.5rem #000;
+
+  &:disabled {
+    color: #8c8c8c;
+    cursor: default;
+  }
+}
+
+#title {
+  color: white;
+  text-align: center;
+  width: 100%;
+  height: 1.7rem;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .casino-font {
+    font-size: 1.5rem;
+    letter-spacing: 0.1rem;
+  }
+
+  .initial-hand-rank {
+    color: white;
+    font-family: var(--font-paytable);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.05rem;
+    text-transform: uppercase;
+    text-shadow: 1px 1px 0 #000;
+  }
 }
 
 #meters {
   display: flex;
   justify-content: space-between;
-  margin-top: 0.7rem;
+  align-items: center;
+  min-height: 2rem;
+  margin-top: 0.15rem;
 
   .casino-font {
-    font-size: 2rem;
-    letter-spacing: 1px;
+    font-size: clamp(1rem, 5vw, 1.8rem);
+    letter-spacing: 0.05rem;
   }
 }
 
@@ -22,6 +101,7 @@
   position: fixed;
   left: 0.75rem;
   top: calc(env(safe-area-inset-top) + 0.5rem);
+  z-index: 2;
   color: rgba(255, 255, 255, 0.55);
   font-family: monospace;
   font-size: 0.25rem;

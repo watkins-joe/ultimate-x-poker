@@ -1,4 +1,4 @@
-import type { BetAmount } from "./gameConfig";
+import type { BaseBetAmount } from "./gameConfig";
 
 export const HAND_TYPES = Object.freeze({
   ROYAL_FLUSH: "royal_flush",
@@ -40,7 +40,7 @@ type WinningHand = Exclude<
   typeof HAND_TYPES.HIGH_CARD
 >;
 
-export const PAYOUTS_PER_BET: Record<BetAmount, Record<WinningHand, number>> = {
+export const PAYOUTS_PER_BET: Record<BaseBetAmount, Record<WinningHand, number>> = {
   1: {
     [HAND_TYPES.ROYAL_FLUSH]: 250,
     [HAND_TYPES.STRAIGHT_FLUSH]: 50,

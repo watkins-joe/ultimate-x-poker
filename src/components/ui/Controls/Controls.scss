@@ -5,27 +5,38 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: monospace;
   color: white;
+  font-family: var(--font-paytable);
   text-align: center;
-  font-size: 1.2rem;
-  text-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+  font-size: clamp(0.8rem, 3.5vw, 1.15rem);
+  text-shadow: 2px 2px 0 #000;
 }
 
 .controls {
   &--container {
     display: flex;
-    gap: 0.2rem;
+    align-items: stretch;
+    gap: 0.3rem;
   }
 
   &--column {
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     flex: 1;
-    gap: 0.2rem;
+    min-width: 0;
+    gap: 0.3rem;
+
+    .casino-button {
+      min-height: clamp(2.7rem, 6vh, 4rem);
+      font-size: clamp(0.9rem, 4vw, 1.5rem);
+    }
 
     .denom {
-      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 3.2rem;
 
       button {
         border: 0;
@@ -39,18 +50,22 @@
       }
 
       img {
-        height: 4.5rem;
+        display: block;
+        height: clamp(2.7rem, 7vh, 4.5rem);
       }
     }
   }
 }
 
 .game-info {
-  font-family: monospace;
-  color: white;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.1rem 0.15rem 0;
+  color: white;
+  font-family: var(--font-paytable);
+  font-size: clamp(0.55rem, 2.5vw, 0.8rem);
 
   .game-name {
     border: 0;
