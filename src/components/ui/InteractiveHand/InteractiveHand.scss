@@ -2,6 +2,9 @@
   display: flex;
   gap: 0.1rem;
   position: relative;
+  justify-content: flex-end;
+  align-self: center;
+  max-width: 17rem;
 
   img {
     display: block;
