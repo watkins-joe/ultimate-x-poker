@@ -86,11 +86,7 @@ function Controls({
               />
             </button>
           </div>
-          <Button
-            disabled={false}
-            text="..."
-            onButtonClick={onPaytableClick}
-          />
+          <Button disabled={false} text="..." onButtonClick={onPaytableClick} />
         </div>
         <div className="controls--column">
           <Button
@@ -129,7 +125,7 @@ function Controls({
         >
           {isResetConfirmationActive ? "ARE YOU SURE?" : gameName}
         </button>
-        <div>{isUltimateXActive ? "ULTIMATE X ACTIVE" : "GAME OVER"}</div>
+        <div>{!isRoundActive ? "GAME OVER" : ""}</div>
       </div>
     </>
   );

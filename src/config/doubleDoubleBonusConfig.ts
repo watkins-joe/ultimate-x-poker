@@ -40,7 +40,10 @@ type WinningHand = Exclude<
   typeof HAND_TYPES.HIGH_CARD
 >;
 
-export const PAYOUTS_PER_BET: Record<BaseBetAmount, Record<WinningHand, number>> = {
+export const PAYOUTS_PER_BET: Record<
+  BaseBetAmount,
+  Record<WinningHand, number>
+> = {
   1: {
     [HAND_TYPES.ROYAL_FLUSH]: 250,
     [HAND_TYPES.STRAIGHT_FLUSH]: 50,
@@ -49,7 +52,7 @@ export const PAYOUTS_PER_BET: Record<BaseBetAmount, Record<WinningHand, number>>
     [HAND_TYPES.FOUR_ACES]: 160,
     [HAND_TYPES.FOUR_TWOS_THREE_FOURS]: 80,
     [HAND_TYPES.FOUR_FIVES_THRU_KINGS]: 50,
-    [HAND_TYPES.FULL_HOUSE]: 8,
+    [HAND_TYPES.FULL_HOUSE]: 9,
     [HAND_TYPES.FLUSH]: 5,
     [HAND_TYPES.STRAIGHT]: 4,
     [HAND_TYPES.THREE_OF_A_KIND]: 3,
@@ -64,7 +67,7 @@ export const PAYOUTS_PER_BET: Record<BaseBetAmount, Record<WinningHand, number>>
     [HAND_TYPES.FOUR_ACES]: 320,
     [HAND_TYPES.FOUR_TWOS_THREE_FOURS]: 160,
     [HAND_TYPES.FOUR_FIVES_THRU_KINGS]: 100,
-    [HAND_TYPES.FULL_HOUSE]: 16,
+    [HAND_TYPES.FULL_HOUSE]: 18,
     [HAND_TYPES.FLUSH]: 10,
     [HAND_TYPES.STRAIGHT]: 8,
     [HAND_TYPES.THREE_OF_A_KIND]: 6,
@@ -79,7 +82,7 @@ export const PAYOUTS_PER_BET: Record<BaseBetAmount, Record<WinningHand, number>>
     [HAND_TYPES.FOUR_ACES]: 480,
     [HAND_TYPES.FOUR_TWOS_THREE_FOURS]: 240,
     [HAND_TYPES.FOUR_FIVES_THRU_KINGS]: 150,
-    [HAND_TYPES.FULL_HOUSE]: 24,
+    [HAND_TYPES.FULL_HOUSE]: 27,
     [HAND_TYPES.FLUSH]: 15,
     [HAND_TYPES.STRAIGHT]: 12,
     [HAND_TYPES.THREE_OF_A_KIND]: 9,
@@ -94,7 +97,7 @@ export const PAYOUTS_PER_BET: Record<BaseBetAmount, Record<WinningHand, number>>
     [HAND_TYPES.FOUR_ACES]: 640,
     [HAND_TYPES.FOUR_TWOS_THREE_FOURS]: 320,
     [HAND_TYPES.FOUR_FIVES_THRU_KINGS]: 200,
-    [HAND_TYPES.FULL_HOUSE]: 32,
+    [HAND_TYPES.FULL_HOUSE]: 36,
     [HAND_TYPES.FLUSH]: 20,
     [HAND_TYPES.STRAIGHT]: 16,
     [HAND_TYPES.THREE_OF_A_KIND]: 12,
@@ -109,7 +112,7 @@ export const PAYOUTS_PER_BET: Record<BaseBetAmount, Record<WinningHand, number>>
     [HAND_TYPES.FOUR_ACES]: 800,
     [HAND_TYPES.FOUR_TWOS_THREE_FOURS]: 400,
     [HAND_TYPES.FOUR_FIVES_THRU_KINGS]: 250,
-    [HAND_TYPES.FULL_HOUSE]: 40,
+    [HAND_TYPES.FULL_HOUSE]: 45,
     [HAND_TYPES.FLUSH]: 25,
     [HAND_TYPES.STRAIGHT]: 20,
     [HAND_TYPES.THREE_OF_A_KIND]: 15,

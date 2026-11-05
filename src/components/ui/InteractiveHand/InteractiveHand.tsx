@@ -25,6 +25,7 @@ export interface InteractiveHandProps {
   multipliers: readonly number[];
   results: readonly (HandResult | null)[];
   activeHandCount: number;
+  showPlayOverlay: boolean;
   onCardClick: (positionIndex: number) => void;
 }
 
@@ -38,6 +39,7 @@ function InteractiveHand({
   multipliers,
   results,
   activeHandCount,
+  showPlayOverlay,
   onCardClick,
 }: InteractiveHandProps) {
   const holdGestureRef = useRef(new HoldSelectionGesture());
@@ -109,6 +111,11 @@ function InteractiveHand({
         queuedMultiplier={multipliers[handIndex] ?? 1}
         result={results[handIndex] ?? null}
       />
+      {showPlayOverlay && (
+        <div aria-hidden="true" className="play-overlay">
+          PLAY 100 CREDITS
+        </div>
+      )}
     </div>
   );
 }

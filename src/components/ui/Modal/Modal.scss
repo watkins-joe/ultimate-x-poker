@@ -47,7 +47,9 @@
   border: 0;
   background: transparent;
   color: #ffeb00;
-  font: 800 2.5rem/1 Arial, sans-serif;
+  font:
+    800 2.5rem/1 Arial,
+    sans-serif;
   cursor: pointer;
 }
 
@@ -78,8 +80,6 @@
 
 .paytable-rules {
   display: grid;
-  gap: 1.1rem;
-  padding: 0 0.35rem;
   color: #ffeb00;
   font-size: clamp(0.8rem, 3.6vw, 1.1rem);
   line-height: 1.35;
@@ -89,7 +89,6 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.35rem;
-  margin-top: auto;
 }
 
 @media (min-height: 50rem) {
@@ -104,6 +103,5 @@
 
   .paytable-rules {
     gap: 1.4rem;
-    margin-bottom: 4rem;
   }
 }

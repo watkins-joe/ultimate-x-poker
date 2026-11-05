@@ -54,14 +54,12 @@ function HandRow({
       key={handIndex}
     >
       <div className="hand-marker" aria-live="polite">
-        {queuedMultiplier > 1 ? (
+        {queuedMultiplier > 1 && (
           <>
             <div>NEXT HAND</div>
             <span>{queuedMultiplier}X</span>
           </>
-        ) : isCurrentHand && canSelect ? (
-          <span>HOLD</span>
-        ) : null}
+        )}
       </div>
       <div
         className={`cards${canSelect ? " is-holding" : ""}${showHeldStatus ? " has-held-cards" : ""}`}

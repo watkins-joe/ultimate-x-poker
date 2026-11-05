@@ -11,9 +11,10 @@ export function getActiveHandCount(bet: BetAmount): number {
 
 export function getPaytableBetAmount(bet: BetAmount): BaseBetAmount {
   if (bet <= 10) return 1;
-  if (bet <= 40) return 2;
-  if (bet === 50) return 3;
-  return 4;
+  if (bet === 20) return 2;
+  if (bet === 30) return 3;
+  if (bet === 40) return 4;
+  return 5;
 }
 
 export const GAME_STATES = {

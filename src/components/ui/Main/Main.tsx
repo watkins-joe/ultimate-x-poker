@@ -552,10 +552,8 @@ function Main() {
       {activeModal === "paytable" && (
         <PaytableModal
           bet={currentBet}
-          canChangeBet={!isRoundActive}
           game={selectedGame}
           winningHands={winningHands}
-          onBetChange={changeBet}
           onClose={() => setActiveModal(null)}
         />
       )}
@@ -580,6 +578,7 @@ function Main() {
             multipliers={multipliers}
             results={handResults}
             activeHandCount={activeHandCount}
+            showPlayOverlay={currentBet !== MAX_BET}
             onCardClick={handleCardClick}
           />
         }
@@ -611,9 +610,6 @@ function Main() {
             onResetBalance={handleResetBalance}
           />
         }
-        showPlayOverlay={currentBet !== MAX_BET}
-        canAffordBet={canAffordBet}
-        onPlay={() => handleDeal()}
         isUltimateXActive={isUltimateXActive}
         isRoundActive={isRoundActive}
         onActivateUltimateX={() => changeBet(MAX_BET)}

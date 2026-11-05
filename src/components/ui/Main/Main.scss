@@ -3,7 +3,7 @@
   flex-direction: column;
   justify-content: flex-start;
   width: min(100%, 48rem);
-  gap: 1rem;
+  gap: 0.5rem;
   height: 100dvh;
   min-height: 100dvh;
   overflow: hidden;
@@ -45,6 +45,7 @@
   flex-direction: column;
   gap: 0.35rem;
   flex: 0 0 auto;
+  margin-top: 0.4rem;
 }
 
 .ultimate-x-indicator {
@@ -72,25 +73,23 @@
 
 .play-overlay {
   position: absolute;
-  top: 0.4rem;
+  top: 50%;
   left: 50%;
   z-index: 1;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   width: min(52%, 24rem);
   min-height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 0.2rem solid #ffeb00;
   background: #000;
   color: #fff;
   font-family: var(--font-paytable);
   font-size: clamp(0.8rem, 3.8vw, 1.3rem);
   font-weight: 800;
-  cursor: pointer;
   box-shadow: 0 0 0.5rem #000;
-
-  &:disabled {
-    color: #8c8c8c;
-    cursor: default;
-  }
+  pointer-events: none;
 }
 
 #title {
@@ -127,7 +126,7 @@
   margin-top: 0.15rem;
 
   .casino-font {
-    font-size: clamp(1rem, 5vw, 1.8rem);
+    font-size: 2rem;
     letter-spacing: 0.05rem;
   }
 }

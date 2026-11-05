@@ -3,9 +3,6 @@ import type { ReactNode } from "react";
 interface GameBottomAreaProps {
   interactiveHand: ReactNode;
   footer: ReactNode;
-  showPlayOverlay: boolean;
-  canAffordBet: boolean;
-  onPlay: () => void;
   isUltimateXActive: boolean;
   isRoundActive: boolean;
   onActivateUltimateX: () => void;
@@ -14,9 +11,6 @@ interface GameBottomAreaProps {
 function GameBottomArea({
   interactiveHand,
   footer,
-  showPlayOverlay,
-  canAffordBet,
-  onPlay,
   isUltimateXActive,
   isRoundActive,
   onActivateUltimateX,
@@ -24,16 +18,6 @@ function GameBottomArea({
   return (
     <section className="game-bottom-area" aria-label="Interactive hand and controls">
       {interactiveHand}
-      {showPlayOverlay && (
-        <button
-          className="play-overlay"
-          disabled={!canAffordBet}
-          onClick={onPlay}
-          type="button"
-        >
-          PLAY 100 CREDITS
-        </button>
-      )}
       <button
         aria-label={
           isUltimateXActive
