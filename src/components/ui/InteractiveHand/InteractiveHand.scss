@@ -8,9 +8,9 @@
 }
 
 .interactive-hand-area {
+  align-self: center;
   position: relative;
-  width: 100%;
-  height: clamp(3.2rem, 9dvh, 6rem);
+  max-width: 80%;
   flex: 0 0 auto;
 }
 
@@ -86,7 +86,6 @@
   display: flex;
   justify-content: center;
   gap: 0.2rem;
-  width: min(72%, 26rem);
   height: 100%;
 }
 
