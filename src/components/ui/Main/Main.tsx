@@ -577,14 +577,14 @@ function Main() {
           activeHandCount={activeHandCount}
           onCardClick={handleCardClick}
         />
-        {isReadyToPlay && (
+        {currentBet !== 100 && (
           <button
             className="play-overlay"
             disabled={!canAffordBet}
             onClick={() => handleDeal()}
             type="button"
           >
-            PLAY {currentBet} CREDITS
+            PLAY {MAX_BET} CREDITS
           </button>
         )}
         <button
