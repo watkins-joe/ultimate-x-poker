@@ -53,6 +53,26 @@ const PAYOUT_COUNT_UP_PER_CREDIT_MS = 8;
 const MAX_PAYOUT_COUNT_UP_MS = 4000;
 const MAX_BET = BETTING_OPTIONS[BETTING_OPTIONS.length - 1];
 
+interface DenominationMultipliers {
+  queued: number[];
+  active: number[];
+}
+
+function createDenominationMultipliers(): Record<
+  Denomination,
+  DenominationMultipliers
+> {
+  return Object.fromEntries(
+    (Object.keys(DENOMINATIONS) as Denomination[]).map((denomination) => [
+      denomination,
+      {
+        queued: Array(MULTI_HAND_COUNT).fill(1),
+        active: Array(MULTI_HAND_COUNT).fill(1),
+      },
+    ]),
+  ) as Record<Denomination, DenominationMultipliers>;
+}
+
 function getInitialBalanceCents(): number {
   try {
     return loadBalanceCents(window.localStorage, STARTING_BALANCE_CENTS);
@@ -98,11 +118,8 @@ function Main() {
   );
   const [handsState, setHandsState] =
     useState<INITIAL_HAND_STATE_TYPE[]>(createEmptyMultiHand);
-  const [multipliers, setMultipliers] = useState<number[]>(() =>
-    Array(MULTI_HAND_COUNT).fill(1),
-  );
-  const [activeMultipliers, setActiveMultipliers] = useState<number[]>(() =>
-    Array(MULTI_HAND_COUNT).fill(1),
+  const [multipliersByDenomination, setMultipliersByDenomination] = useState(
+    createDenominationMultipliers,
   );
   const [handResults, setHandResults] = useState<(HandResult | null)[]>(() =>
     Array(MULTI_HAND_COUNT).fill(null),
@@ -130,6 +147,8 @@ function Main() {
   const canAffordBet = balanceCents >= totalBetCostCents;
   const maxBetCostCents = MAX_BET * denominationValueCents;
   const canAffordMaxBet = balanceCents >= maxBetCostCents;
+  const multipliers = multipliersByDenomination[denomination].queued;
+  const activeMultipliers = multipliersByDenomination[denomination].active;
   const isUltimateXActive = currentBet === MAX_BET;
   const activeHandCount = getActiveHandCount(currentBet);
 
@@ -357,10 +376,15 @@ function Main() {
     const multipliersForDeal = bonusIsActive
       ? [...multipliers]
       : Array(MULTI_HAND_COUNT).fill(1);
-    setActiveMultipliers(multipliersForDeal);
-    if (bonusIsActive) {
-      setMultipliers(Array(MULTI_HAND_COUNT).fill(1));
-    }
+    setMultipliersByDenomination((current) => ({
+      ...current,
+      [denomination]: {
+        queued: bonusIsActive
+          ? Array(MULTI_HAND_COUNT).fill(1)
+          : current[denomination].queued,
+        active: multipliersForDeal,
+      },
+    }));
     setInitialHand(createEmptyHand());
     setHandsState(createEmptyMultiHand());
     setGameState(GAME_STATES.Game_Over);
@@ -456,15 +480,20 @@ function Main() {
           ),
         );
         if (bonusIsActive) {
-          setMultipliers((current) =>
-            current.map((multiplier, index) =>
-              index === handIndex && result.payoutCredits > 0
-                ? (selectedGame.multiplierByHand[result.rank] ?? 1)
-                : index === handIndex
-                  ? 1
-                  : multiplier,
-            ),
-          );
+          setMultipliersByDenomination((current) => ({
+            ...current,
+            [denomination]: {
+              ...current[denomination],
+              queued: current[denomination].queued.map(
+                (multiplier, index) =>
+                  index === handIndex && result.payoutCredits > 0
+                    ? (selectedGame.multiplierByHand[result.rank] ?? 1)
+                    : index === handIndex
+                      ? 1
+                      : multiplier,
+              ),
+            },
+          }));
         }
       },
       () => {
@@ -531,8 +560,7 @@ function Main() {
     setHasResolvedAllHands(false);
     setInitialHand(createEmptyHand());
     setHandsState(createEmptyMultiHand());
-    setMultipliers(Array(MULTI_HAND_COUNT).fill(1));
-    setActiveMultipliers(Array(MULTI_HAND_COUNT).fill(1));
+    setMultipliersByDenomination(createDenominationMultipliers());
     setWinCredits(0);
     setGameState(GAME_STATES.Game_Over);
     setActiveModal(null);
