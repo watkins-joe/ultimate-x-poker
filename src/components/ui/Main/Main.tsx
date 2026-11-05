@@ -32,15 +32,15 @@ import {
   saveSelectedGame,
 } from "../../../utils/balanceStorage";
 import { CARDS, shuffle } from "../../../utils/cards";
-import Controls from "../Controls/Controls";
-import { CreditMeter } from "../CreditsCounter/CreditsCounter";
 import DenomModal from "../DenomModal/DenomModal";
+import GameBottomArea from "../GameBottomArea/GameBottomArea";
+import GameFooter from "../GameFooter/GameFooter";
 import GameMenu from "../GameMenu/GameMenu";
 import InteractiveHand, {
   type HandResult,
 } from "../InteractiveHand/InteractiveHand";
+import GameTable from "../InteractiveHand/GameTable";
 import PaytableModal from "../Paytable/PaytableModal";
-import WinMeter from "../WinMeter/WinMeter";
 import "./Main.scss";
 
 const DEFAULT_DENOMINATION: Denomination = "25c";
@@ -530,12 +530,7 @@ function Main() {
   const winningHands = handResults.flatMap((result) =>
     result && result.payoutCredits > 0 ? [result.rank] : [],
   );
-  const winningHandCount = winningHands.length;
   const isRoundResolved = handResults.some((result) => result !== null);
-  const isReadyToPlay =
-    !isRoundActive &&
-    initialHand.every((card) => card.cardId === null) &&
-    handResults.every((result) => result === null);
 
   return (
     <div className="main-container">
@@ -564,85 +559,65 @@ function Main() {
           onClose={() => setActiveModal(null)}
         />
       )}
-      <section className="game-shell" aria-label="Ultimate X Poker table">
-        <InteractiveHand
-          gameState={gameState}
-          hands={handsState}
-          initialHand={initialHand}
-          isDrawing={isDrawing}
-          isInitialDeal={isInitialDeal}
-          game={selectedGame}
-          multipliers={multipliers}
-          results={handResults}
-          activeHandCount={activeHandCount}
-          onCardClick={handleCardClick}
-        />
-        {currentBet !== 100 && (
-          <button
-            className="play-overlay"
-            disabled={!canAffordBet}
-            onClick={() => handleDeal()}
-            type="button"
-          >
-            PLAY {MAX_BET} CREDITS
-          </button>
-        )}
-        <button
-          aria-label={
-            isUltimateXActive
-              ? "Ultimate X bonus active"
-              : "Set bet to 100 credits to activate Ultimate X"
-          }
-          className="ultimate-x-indicator"
-          disabled={isUltimateXActive || isRoundActive}
-          onClick={() => changeBet(MAX_BET)}
-          type="button"
-        >
-          <img
-            alt={
-              isUltimateXActive
-                ? "Ultimate X active"
-                : "Bet max credits to activate the Ultimate X feature"
-            }
-            src={`/assets/ui/${isUltimateXActive ? "bonusActive" : "betMax"}.gif`}
+      <GameTable
+        gameState={gameState}
+        initialHand={initialHand}
+        hands={handsState}
+        game={selectedGame}
+        multipliers={multipliers}
+        results={handResults}
+        activeHandCount={activeHandCount}
+      />
+      <GameBottomArea
+        interactiveHand={
+          <InteractiveHand
+            gameState={gameState}
+            hands={handsState}
+            initialHand={initialHand}
+            isDrawing={isDrawing}
+            isInitialDeal={isInitialDeal}
+            game={selectedGame}
+            multipliers={multipliers}
+            results={handResults}
+            activeHandCount={activeHandCount}
+            onCardClick={handleCardClick}
           />
-        </button>
-      </section>
-      <footer className="game-footer">
-        <div id="meters">
-          <WinMeter
-            isResolved={isRoundResolved}
+        }
+        footer={
+          <GameFooter
             winCredits={winCredits}
-            winningHandCount={winningHandCount}
-          />
-          <CreditMeter
+            isRoundResolved={isRoundResolved}
             creditsMode={isCreditsMode}
             balanceCents={displayBalanceCents}
             denominationValueCents={denominationValueCents}
             onModeChange={toggleCreditsMode}
+            currentBet={currentBet}
+            denomination={denomination}
+            canDeal={canAffordBet}
+            canBetMax={canAffordMaxBet}
+            isRoundActive={isRoundActive}
+            isBetting={isBetting}
+            isResetConfirmationActive={isResetConfirmationActive}
+            isUltimateXActive={isUltimateXActive}
+            gameName={selectedGame.name}
+            canDraw={gameState === GAME_STATES.Awaiting_Holds}
+            isDrawing={isDrawing}
+            onBetChange={changeBet}
+            onDeal={handleDeal}
+            onDenomClick={() => setActiveModal("denomination")}
+            onMenuClick={() => setActiveModal("game-selection")}
+            onPaytableClick={() => setActiveModal("paytable")}
+            onDraw={handleDraw}
+            onResetBalance={handleResetBalance}
           />
-        </div>
-        <Controls
-          currentBet={currentBet}
-          denomination={denomination}
-          canDeal={canAffordBet}
-          canBetMax={canAffordMaxBet}
-          isRoundActive={isRoundActive}
-          isBetting={isBetting}
-          isResetConfirmationActive={isResetConfirmationActive}
-          isUltimateXActive={isUltimateXActive}
-          gameName={selectedGame.name}
-          canDraw={gameState === GAME_STATES.Awaiting_Holds}
-          isDrawing={isDrawing}
-          onBetChange={changeBet}
-          onDeal={handleDeal}
-          onDenomClick={() => setActiveModal("denomination")}
-          onMenuClick={() => setActiveModal("game-selection")}
-          onPaytableClick={() => setActiveModal("paytable")}
-          onDraw={handleDraw}
-          onResetBalance={handleResetBalance}
-        />
-      </footer>
+        }
+        showPlayOverlay={currentBet !== MAX_BET}
+        canAffordBet={canAffordBet}
+        onPlay={() => handleDeal()}
+        isUltimateXActive={isUltimateXActive}
+        isRoundActive={isRoundActive}
+        onActivateUltimateX={() => changeBet(MAX_BET)}
+      />
     </div>
   );
 }
