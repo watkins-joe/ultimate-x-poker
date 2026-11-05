@@ -15,6 +15,14 @@
 }
 
 @font-face {
+  font-family: "Korinth Serial Bold";
+  src: url("/fonts/KorinthSerialBold.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: "Oxanium Extra Bold";
   src: url("/fonts/Oxanium-ExtraBold.ttf") format("truetype");
   font-weight: 800;

@@ -3,10 +3,7 @@ import {
   useRef,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-import {
-  GAME_STATES,
-  type GameState,
-} from "../../../config/gameConfig";
+import { GAME_STATES, type GameState } from "../../../config/gameConfig";
 import type { GameDefinition, HandRank } from "../../../config/games";
 import {
   createEmptyHand,
@@ -104,8 +101,7 @@ function InteractiveHand({
   );
 
   function renderHand(handIndex: number, isCurrentHand: boolean) {
-    const isActiveHand =
-      handIndex >= MULTI_HAND_COUNT - activeHandCount;
+    const isActiveHand = handIndex >= MULTI_HAND_COUNT - activeHandCount;
     const hand =
       isCurrentHand && initialHandIsVisible
         ? initialHand
@@ -130,8 +126,8 @@ function InteractiveHand({
         <div className="hand-marker" aria-live="polite">
           {queuedMultiplier > 1 ? (
             <>
-              <span>NEXT HAND</span>
-              <strong>{queuedMultiplier}X</strong>
+              <div>NEXT HAND</div>
+              <span>{queuedMultiplier}X</span>
             </>
           ) : isCurrentHand && canSelect ? (
             <span>HOLD</span>
