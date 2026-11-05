@@ -107,8 +107,10 @@ function Main() {
   const [handResults, setHandResults] = useState<(HandResult | null)[]>(() =>
     Array(MULTI_HAND_COUNT).fill(null),
   );
-  const [initialHandResult, setInitialHandResult] =
-    useState<HandResult | null>(null);
+  const [initialHandResult, setInitialHandResult] = useState<HandResult | null>(
+    null,
+  );
+  const [hasResolvedAllHands, setHasResolvedAllHands] = useState(false);
   const [isInitialDeal, setIsInitialDeal] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
   const [isBetting, setIsBetting] = useState(false);
@@ -350,6 +352,7 @@ function Main() {
     setWinCredits(0);
     setHandResults(Array(MULTI_HAND_COUNT).fill(null));
     setInitialHandResult(null);
+    setHasResolvedAllHands(false);
     const bonusIsActive = bet === MAX_BET;
     const multipliersForDeal = bonusIsActive
       ? [...multipliers]
@@ -421,6 +424,7 @@ function Main() {
 
     setHandResults(Array(MULTI_HAND_COUNT).fill(null));
     setInitialHandResult(null);
+    setHasResolvedAllHands(false);
     setWinCredits(0);
     setGameState(GAME_STATES.Game_Over);
 
@@ -451,9 +455,6 @@ function Main() {
             index === handIndex ? result : existing,
           ),
         );
-        if (result.payoutCredits > 0) {
-          setWinCredits((current) => current + result.payoutCredits);
-        }
         if (bonusIsActive) {
           setMultipliers((current) =>
             current.map((multiplier, index) =>
@@ -467,6 +468,7 @@ function Main() {
         }
       },
       () => {
+        setHasResolvedAllHands(true);
         const totalWinCredits = results.reduce(
           (total, result) => total + (result?.payoutCredits ?? 0),
           0,
@@ -475,6 +477,7 @@ function Main() {
         const payoutCents = totalWinCredits * denominationValueCents;
         setBalanceCents((balance) => balance + payoutCents);
         if (payoutCents === 0) {
+          setWinCredits(0);
           setIsCountingPayout(false);
           return;
         }
@@ -490,6 +493,7 @@ function Main() {
 
         const countUp = (currentTime: number) => {
           const progress = Math.min((currentTime - startTime) / duration, 1);
+          setWinCredits(Math.floor(totalWinCredits * progress));
           setDisplayBalanceCents(
             Math.round(startingBalanceCents + payoutCents * progress),
           );
@@ -498,6 +502,7 @@ function Main() {
             payoutAnimationFrameRef.current = requestAnimationFrame(countUp);
           } else {
             payoutAnimationFrameRef.current = null;
+            setWinCredits(totalWinCredits);
             setDisplayBalanceCents(startingBalanceCents + payoutCents);
             setIsCountingPayout(false);
           }
@@ -523,6 +528,7 @@ function Main() {
     setSelectedGameId(gameId);
     setHandResults(Array(MULTI_HAND_COUNT).fill(null));
     setInitialHandResult(null);
+    setHasResolvedAllHands(false);
     setInitialHand(createEmptyHand());
     setHandsState(createEmptyMultiHand());
     setMultipliers(Array(MULTI_HAND_COUNT).fill(1));
@@ -545,7 +551,7 @@ function Main() {
   const winningHands = handResults.flatMap((result) =>
     result && result.payoutCredits > 0 ? [result.rank] : [],
   );
-  const isRoundResolved = handResults.some((result) => result !== null);
+  const isRoundResolved = hasResolvedAllHands;
 
   return (
     <div className="main-container">

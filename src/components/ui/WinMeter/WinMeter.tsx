@@ -6,13 +6,15 @@ interface WinMeterProps {
 }
 
 function WinMeter({ winCredits, isResolved }: WinMeterProps) {
+  const hasWin = isResolved && winCredits > 0;
+
   return (
     <div
-      className={`win-meter casino-font${isResolved ? " is-visible" : ""}`}
+      className={`win-meter casino-font${hasWin ? " is-visible" : ""}`}
       aria-live="polite"
-      aria-hidden={!isResolved}
+      aria-hidden={!hasWin}
     >
-      {isResolved && (
+      {hasWin && (
         <>
           <span>WIN {Math.floor(winCredits)}</span>
         </>
