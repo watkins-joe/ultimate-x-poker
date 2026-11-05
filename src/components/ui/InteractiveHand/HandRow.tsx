@@ -32,6 +32,7 @@ const WINNING_HAND_ACCENTS: Readonly<Record<HandRank, string>> = {
 export interface HandResult {
   rank: HandRank;
   title: string;
+  basePayoutCredits: number;
   payoutCredits: number;
   multiplierApplied: number;
 }
@@ -82,16 +83,20 @@ function HandRow({
       key={handIndex}
     >
       <div className="hand-marker" aria-live="polite">
-        {activeMultiplier > 1 ? (
-          <span aria-label={`Active multiplier ${activeMultiplier}X`}>
-            {activeMultiplier}X
-          </span>
-        ) : queuedMultiplier > 1 ? (
-          <>
+        {queuedMultiplier > 1 && (
+          <div className="queued-hand-multiplier">
             <div>NEXT HAND</div>
             <span>{queuedMultiplier}X</span>
-          </>
-        ) : null}
+          </div>
+        )}
+        {activeMultiplier > 1 && (
+          <span
+            aria-label={`Active multiplier ${activeMultiplier}X`}
+            className="active-hand-multiplier"
+          >
+            {activeMultiplier}X
+          </span>
+        )}
       </div>
       <div
         className={`cards${canSelect ? " is-holding" : ""}${showHeldStatus ? " has-held-cards" : ""}`}
@@ -135,7 +140,11 @@ function HandRow({
             role="status"
           >
             <span>{result.title.toLowerCase()}</span>
-            <strong>{result.payoutCredits}</strong>
+            <strong>
+              {result.multiplierApplied > 1
+                ? `${result.multiplierApplied} x ${result.basePayoutCredits} = ${result.payoutCredits}`
+                : result.payoutCredits}
+            </strong>
           </div>
         )}
       </div>

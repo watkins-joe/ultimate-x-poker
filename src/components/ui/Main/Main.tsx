@@ -326,6 +326,7 @@ function Main() {
     return {
       rank,
       title: game.handNames[rank] ?? "NO WIN",
+      basePayoutCredits: basePayout,
       payoutCredits: basePayout * multiplier,
       multiplierApplied: multiplier,
     };
@@ -436,11 +437,6 @@ function Main() {
     showHands(
       finalHands,
       (handIndex) => {
-        setActiveMultipliers((current) =>
-          current.map((multiplier, index) =>
-            index === handIndex ? 1 : multiplier,
-          ),
-        );
         const result = results[handIndex];
         if (result === null || result === undefined) return;
 
