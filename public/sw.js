@@ -10,25 +10,7 @@ const APP_SHELL = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    (async () => {
-      const cache = await caches.open(CACHE_NAME);
-      await cache.addAll(APP_SHELL);
-
-      const cachedPage = await cache.match("/index.html");
-      if (!cachedPage) {
-        throw new Error("No cached app shell is available to precache.");
-      }
-
-      const pageHtml = await cachedPage.text();
-      const appBundles = Array.from(
-        pageHtml.matchAll(/(?:src|href)="(\/[^"]+\.(?:js|css))"/g),
-        ([, assetPath]) => assetPath,
-      );
-      if (appBundles.length === 0) {
-        throw new Error("No production app bundles were found to precache.");
-      }
-      await cache.addAll(appBundles);
-    })(),
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)),
   );
   self.skipWaiting();
 });
@@ -40,11 +22,7 @@ self.addEventListener("activate", (event) => {
       .then((cacheNames) =>
         Promise.all(
           cacheNames
-            .filter(
-              (cacheName) =>
-                cacheName.startsWith("ultimate-x-poker-app-") &&
-                cacheName !== CACHE_NAME,
-            )
+            .filter((cacheName) => cacheName !== CACHE_NAME)
             .map((cacheName) => caches.delete(cacheName)),
         ),
       )
@@ -62,14 +40,12 @@ self.addEventListener("fetch", (event) => {
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request)
-        .then(async (response) => {
+        .then((response) => {
           if (response.ok) {
-            try {
-              const cache = await caches.open(CACHE_NAME);
-              await cache.put("/index.html", response.clone());
-            } catch (error) {
-              console.error("Failed to cache the app page:", error);
-            }
+            const responseCopy = response.clone();
+            caches
+              .open(CACHE_NAME)
+              .then((cache) => cache.put("/index.html", responseCopy));
           }
           return response;
         })
@@ -85,17 +61,15 @@ self.addEventListener("fetch", (event) => {
   }
 
   event.respondWith(
-    caches.match(request, { ignoreVary: true }).then(
+    caches.match(request).then(
       (cachedResponse) =>
         cachedResponse ??
-        fetch(request).then(async (response) => {
+        fetch(request).then((response) => {
           if (response.ok) {
-            try {
-              const cache = await caches.open(CACHE_NAME);
-              await cache.put(request, response.clone());
-            } catch (error) {
-              console.error("Failed to cache app resource:", error);
-            }
+            const responseCopy = response.clone();
+            caches
+              .open(CACHE_NAME)
+              .then((cache) => cache.put(request, responseCopy));
           }
           return response;
         }),
