@@ -42,3 +42,7 @@ npm run dev
 npm run build
 npm run lint
 ```
+
+Production builds include an installable PWA manifest and app icons. The service
+worker caches the app shell and production bundles for offline startup; install
+support requires HTTPS or localhost.

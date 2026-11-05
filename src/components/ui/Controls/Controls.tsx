@@ -16,7 +16,6 @@ interface ControlsProps {
   isRoundActive: boolean;
   isBetting: boolean;
   isResetConfirmationActive: boolean;
-  isUltimateXActive: boolean;
   gameName: GameDefinition["name"];
   canDraw: boolean;
   isDrawing: boolean;
@@ -37,7 +36,6 @@ function Controls({
   isRoundActive,
   isBetting,
   isResetConfirmationActive,
-  isUltimateXActive,
   gameName,
   canDraw,
   isDrawing,

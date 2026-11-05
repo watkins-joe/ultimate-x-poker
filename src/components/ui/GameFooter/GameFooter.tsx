@@ -18,7 +18,6 @@ interface GameFooterProps {
   isRoundActive: boolean;
   isBetting: boolean;
   isResetConfirmationActive: boolean;
-  isUltimateXActive: boolean;
   gameName: GameDefinition["name"];
   canDraw: boolean;
   isDrawing: boolean;
@@ -45,7 +44,6 @@ function GameFooter({
   isRoundActive,
   isBetting,
   isResetConfirmationActive,
-  isUltimateXActive,
   gameName,
   canDraw,
   isDrawing,
@@ -76,7 +74,6 @@ function GameFooter({
         isRoundActive={isRoundActive}
         isBetting={isBetting}
         isResetConfirmationActive={isResetConfirmationActive}
-        isUltimateXActive={isUltimateXActive}
         gameName={gameName}
         canDraw={canDraw}
         isDrawing={isDrawing}

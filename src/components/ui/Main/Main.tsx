@@ -620,7 +620,6 @@ function Main() {
             isRoundActive={isRoundActive}
             isBetting={isBetting}
             isResetConfirmationActive={isResetConfirmationActive}
-            isUltimateXActive={isUltimateXActive}
             gameName={selectedGame.name}
             canDraw={gameState === GAME_STATES.Awaiting_Holds}
             isDrawing={isDrawing}
