@@ -15,6 +15,8 @@
 }
 
 .interactive-hand-area .hand-marker {
+  left: -0.6rem;
+  top: 0.25rem;
   width: 14%;
 }
 
@@ -43,8 +45,8 @@
 
 .hand-marker {
   position: absolute;
-  left: 2rem;
-  top: 0;
+  left: 1.1rem;
+  top: 0.4rem;
   width: 14%;
   display: flex;
   flex-direction: row;
@@ -111,18 +113,18 @@
 
 .winning-hand-overlay {
   position: absolute;
-  top: 50%;
+  bottom: 0px;
   left: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 70%;
-  height: min(3.6rem, 78%);
-  transform: translate(-50%, -50%);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
+  width: 45%;
+  padding: 0.25rem;
+  transform: translate(-50%);
+  border: 4px solid var(--hand-accent);
+  border-radius: 0.25rem;
+  background: #000;
   color: #fff;
   font-family: var(--font-bauhaus);
   font-size: clamp(0.65rem, 2vw, 0.95rem);
@@ -139,4 +141,36 @@
     color: #ffeb00;
     font-size: 0.95em;
   }
+}
+
+.winning-hand-overlay--purple {
+  --hand-accent: #ae2ec9;
+}
+
+.winning-hand-overlay--light-blue {
+  --hand-accent: #2dbcff;
+}
+
+.winning-hand-overlay--yellow {
+  --hand-accent: #ffd51c;
+}
+
+.winning-hand-overlay--green {
+  --hand-accent: #00b400;
+}
+
+.winning-hand-overlay--blue {
+  --hand-accent: #0433ff;
+}
+
+.winning-hand-overlay--burgundy {
+  --hand-accent: #ff2600;
+}
+
+.winning-hand-overlay--pink {
+  --hand-accent: #ff4f96;
+}
+
+.winning-hand-overlay--orange {
+  --hand-accent: #ff9e48;
 }

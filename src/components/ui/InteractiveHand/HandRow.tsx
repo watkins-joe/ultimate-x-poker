@@ -1,7 +1,33 @@
 import type { PointerEvent as ReactPointerEvent } from "react";
+import { DEUCES_WILD_HAND_TYPES } from "../../../config/deucesWildConfig";
+import { HAND_TYPES } from "../../../config/doubleDoubleBonusConfig";
 import type { GameDefinition, HandRank } from "../../../config/games";
 import type { INITIAL_HAND_STATE_TYPE } from "../../../config/hands";
 import "./InteractiveHand.scss";
+
+const WINNING_HAND_ACCENTS: Readonly<Record<HandRank, string>> = {
+  [HAND_TYPES.ROYAL_FLUSH]: "orange",
+  [HAND_TYPES.STRAIGHT_FLUSH]: "pink",
+  [HAND_TYPES.FOUR_ACES_WITH_ANY_TWO_THREE_FOUR]: "burgundy",
+  [HAND_TYPES.FOUR_TWOS_THREE_FOURS_WITH_ACE_TWO_THREE_FOUR]: "burgundy",
+  [HAND_TYPES.FOUR_ACES]: "burgundy",
+  [HAND_TYPES.FOUR_TWOS_THREE_FOURS]: "burgundy",
+  [HAND_TYPES.FOUR_FIVES_THRU_KINGS]: "burgundy",
+  [HAND_TYPES.FULL_HOUSE]: "blue",
+  [HAND_TYPES.FLUSH]: "green",
+  [HAND_TYPES.STRAIGHT]: "yellow",
+  [HAND_TYPES.THREE_OF_A_KIND]: "yellow",
+  [HAND_TYPES.TWO_PAIR]: "light-blue",
+  [HAND_TYPES.JACKS_OR_BETTER]: "purple",
+  [DEUCES_WILD_HAND_TYPES.ROYAL_FLUSH_NO_DEUCES]: "orange",
+  [DEUCES_WILD_HAND_TYPES.FOUR_DEUCES_WITH_ACE]: "burgundy",
+  [DEUCES_WILD_HAND_TYPES.FOUR_DEUCES]: "burgundy",
+  [DEUCES_WILD_HAND_TYPES.ROYAL_FLUSH_WITH_DEUCES]: "orange",
+  [DEUCES_WILD_HAND_TYPES.FIVE_ACES]: "burgundy",
+  [DEUCES_WILD_HAND_TYPES.FIVE_THREES_FOURS_FIVES]: "burgundy",
+  [DEUCES_WILD_HAND_TYPES.FIVE_SIXES_THRU_KINGS]: "burgundy",
+  [DEUCES_WILD_HAND_TYPES.FOUR_OF_A_KIND]: "burgundy",
+};
 
 export interface HandResult {
   rank: HandRank;
@@ -17,6 +43,7 @@ interface HandRowProps {
   isActiveHand: boolean;
   canSelect: boolean;
   queuedMultiplier: number;
+  activeMultiplier: number;
   result: HandResult | null;
   game: GameDefinition;
   onCardPointerDown?: (
@@ -36,6 +63,7 @@ function HandRow({
   isActiveHand,
   canSelect,
   queuedMultiplier,
+  activeMultiplier,
   result,
   game,
   onCardPointerDown,
@@ -44,9 +72,9 @@ function HandRow({
   const hasHeldCards = hand.some((card) => card.isHeld);
   const showHeldStatus = isCurrentHand && hasHeldCards;
   const isWinningHand = result !== null && result.payoutCredits > 0;
-  const paylineFrame = isWinningHand
-    ? `/assets/ui/payline${Math.min(16, Math.max(1, result.multiplierApplied))}_2.gif`
-    : null;
+  const overlayAccent = isWinningHand
+    ? WINNING_HAND_ACCENTS[result.rank]
+    : undefined;
 
   return (
     <div
@@ -54,12 +82,16 @@ function HandRow({
       key={handIndex}
     >
       <div className="hand-marker" aria-live="polite">
-        {queuedMultiplier > 1 && (
+        {activeMultiplier > 1 ? (
+          <span aria-label={`Active multiplier ${activeMultiplier}X`}>
+            {activeMultiplier}X
+          </span>
+        ) : queuedMultiplier > 1 ? (
           <>
             <div>NEXT HAND</div>
             <span>{queuedMultiplier}X</span>
           </>
-        )}
+        ) : null}
       </div>
       <div
         className={`cards${canSelect ? " is-holding" : ""}${showHeldStatus ? " has-held-cards" : ""}`}
@@ -96,12 +128,11 @@ function HandRow({
             </div>
           );
         })}
-        {isWinningHand && paylineFrame && (
+        {isWinningHand && overlayAccent && (
           <div
             aria-label={`${result.title}, ${result.payoutCredits} credits`}
-            className="winning-hand-overlay"
+            className={`winning-hand-overlay winning-hand-overlay--${overlayAccent}`}
             role="status"
-            style={{ backgroundImage: `url("${paylineFrame}")` }}
           >
             <span>{result.title.toLowerCase()}</span>
             <strong>{result.payoutCredits}</strong>

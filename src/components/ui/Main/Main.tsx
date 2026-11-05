@@ -36,10 +36,10 @@ import DenomModal from "../DenomModal/DenomModal";
 import GameBottomArea from "../GameBottomArea/GameBottomArea";
 import GameFooter from "../GameFooter/GameFooter";
 import GameMenu from "../GameMenu/GameMenu";
+import GameTable from "../InteractiveHand/GameTable";
 import InteractiveHand, {
   type HandResult,
 } from "../InteractiveHand/InteractiveHand";
-import GameTable from "../InteractiveHand/GameTable";
 import PaytableModal from "../Paytable/PaytableModal";
 import "./Main.scss";
 
@@ -47,7 +47,6 @@ const DEFAULT_DENOMINATION: Denomination = "25c";
 const STARTING_BALANCE_CENTS = 100_000;
 const DEAL_CARD_DELAY_MS = 120;
 const DRAW_CARD_DELAY_MS = 35;
-const BET_COLUMN_DELAY_MS = 120;
 const RESET_CONFIRMATION_TIMEOUT_MS = 5000;
 const BASE_PAYOUT_COUNT_UP_MS = 500;
 const PAYOUT_COUNT_UP_PER_CREDIT_MS = 8;
@@ -102,9 +101,14 @@ function Main() {
   const [multipliers, setMultipliers] = useState<number[]>(() =>
     Array(MULTI_HAND_COUNT).fill(1),
   );
+  const [activeMultipliers, setActiveMultipliers] = useState<number[]>(() =>
+    Array(MULTI_HAND_COUNT).fill(1),
+  );
   const [handResults, setHandResults] = useState<(HandResult | null)[]>(() =>
     Array(MULTI_HAND_COUNT).fill(null),
   );
+  const [initialHandResult, setInitialHandResult] =
+    useState<HandResult | null>(null);
   const [isInitialDeal, setIsInitialDeal] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
   const [isBetting, setIsBetting] = useState(false);
@@ -344,6 +348,10 @@ function Main() {
     setDisplayBalanceCents((balance) => balance - wagerCostCents);
     setWinCredits(0);
     setHandResults(Array(MULTI_HAND_COUNT).fill(null));
+    setInitialHandResult(null);
+    setActiveMultipliers(
+      bet === MAX_BET ? [...multipliers] : Array(MULTI_HAND_COUNT).fill(1),
+    );
     setInitialHand(createEmptyHand());
     setHandsState(createEmptyMultiHand());
     setGameState(GAME_STATES.Game_Over);
@@ -356,28 +364,22 @@ function Main() {
         .map((cardId) => ({ cardId, isHeld: false }));
 
       showInitialCards(dealtHand, () => {
+        const initialResult = getHandResult(
+          dealtHand,
+          bet,
+          selectedGame,
+          bet === MAX_BET ? (multipliers[MULTI_HAND_COUNT - 1] ?? 1) : 1,
+        );
+        setInitialHandResult(
+          initialResult && initialResult.payoutCredits > 0
+            ? initialResult
+            : null,
+        );
         setGameState(GAME_STATES.Awaiting_Holds);
       });
     };
 
-    const highlightBetColumn = (highlightedBet: BetAmount) => {
-      dealTimeoutRef.current = window.setTimeout(() => {
-        if (highlightedBet === bet) {
-          dealCards();
-          return;
-        }
-
-        const nextBet =
-          BETTING_OPTIONS[BETTING_OPTIONS.indexOf(highlightedBet) + 1];
-        if (nextBet === undefined) {
-          dealCards();
-        } else {
-          highlightBetColumn(nextBet);
-        }
-      }, BET_COLUMN_DELAY_MS);
-    };
-
-    highlightBetColumn(BETTING_OPTIONS[0]);
+    dealCards();
   }
 
   function handleDraw() {
@@ -412,7 +414,11 @@ function Main() {
     );
 
     setHandResults(Array(MULTI_HAND_COUNT).fill(null));
+    setInitialHandResult(null);
     setWinCredits(0);
+    setActiveMultipliers(
+      currentBet === MAX_BET ? [...multipliers] : Array(MULTI_HAND_COUNT).fill(1),
+    );
     setGameState(GAME_STATES.Game_Over);
 
     const bonusIsActive = currentBet === MAX_BET;
@@ -430,6 +436,11 @@ function Main() {
     showHands(
       finalHands,
       (handIndex) => {
+        setActiveMultipliers((current) =>
+          current.map((multiplier, index) =>
+            index === handIndex ? 1 : multiplier,
+          ),
+        );
         const result = results[handIndex];
         if (result === null || result === undefined) return;
 
@@ -509,9 +520,11 @@ function Main() {
 
     setSelectedGameId(gameId);
     setHandResults(Array(MULTI_HAND_COUNT).fill(null));
+    setInitialHandResult(null);
     setInitialHand(createEmptyHand());
     setHandsState(createEmptyMultiHand());
     setMultipliers(Array(MULTI_HAND_COUNT).fill(1));
+    setActiveMultipliers(Array(MULTI_HAND_COUNT).fill(1));
     setWinCredits(0);
     setGameState(GAME_STATES.Game_Over);
     setActiveModal(null);
@@ -563,6 +576,7 @@ function Main() {
         hands={handsState}
         game={selectedGame}
         multipliers={multipliers}
+        activeMultipliers={activeMultipliers}
         results={handResults}
         activeHandCount={activeHandCount}
       />
@@ -576,9 +590,10 @@ function Main() {
             isInitialDeal={isInitialDeal}
             game={selectedGame}
             multipliers={multipliers}
+            activeMultipliers={activeMultipliers}
             results={handResults}
             activeHandCount={activeHandCount}
-            showPlayOverlay={currentBet !== MAX_BET}
+            initialHandResult={initialHandResult}
             onCardClick={handleCardClick}
           />
         }

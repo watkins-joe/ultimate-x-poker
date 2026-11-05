@@ -13,6 +13,7 @@ interface GameTableProps {
   hands: INITIAL_HAND_STATE_TYPE[];
   game: GameDefinition;
   multipliers: readonly number[];
+  activeMultipliers: readonly number[];
   results: readonly (HandResult | null)[];
   activeHandCount: number;
 }
@@ -23,6 +24,7 @@ function GameTable({
   hands,
   game,
   multipliers,
+  activeMultipliers,
   results,
   activeHandCount,
 }: GameTableProps) {
@@ -52,6 +54,7 @@ function GameTable({
                 isCurrentHand={false}
                 key={handIndex}
                 queuedMultiplier={multipliers[handIndex] ?? 1}
+                activeMultiplier={activeMultipliers[handIndex] ?? 1}
                 result={results[handIndex] ?? null}
               />
             );

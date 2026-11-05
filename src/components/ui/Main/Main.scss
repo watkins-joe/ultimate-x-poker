@@ -71,27 +71,6 @@
   }
 }
 
-.play-overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 1;
-  transform: translate(-50%, -50%);
-  width: min(52%, 24rem);
-  min-height: 3rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 0.2rem solid #ffeb00;
-  background: #000;
-  color: #fff;
-  font-family: var(--font-paytable);
-  font-size: clamp(0.8rem, 3.8vw, 1.3rem);
-  font-weight: 800;
-  box-shadow: 0 0 0.5rem #000;
-  pointer-events: none;
-}
-
 #title {
   color: white;
   text-align: center;

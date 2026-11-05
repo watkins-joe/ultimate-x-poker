@@ -23,9 +23,10 @@ export interface InteractiveHandProps {
   isDrawing: boolean;
   game: GameDefinition;
   multipliers: readonly number[];
+  activeMultipliers: readonly number[];
   results: readonly (HandResult | null)[];
   activeHandCount: number;
-  showPlayOverlay: boolean;
+  initialHandResult: HandResult | null;
   onCardClick: (positionIndex: number) => void;
 }
 
@@ -37,9 +38,10 @@ function InteractiveHand({
   isDrawing,
   game,
   multipliers,
+  activeMultipliers,
   results,
   activeHandCount,
-  showPlayOverlay,
+  initialHandResult,
   onCardClick,
 }: InteractiveHandProps) {
   const holdGestureRef = useRef(new HoldSelectionGesture());
@@ -109,13 +111,13 @@ function InteractiveHand({
         onCardPointerDown={handleCardPointerDown}
         onCardPointerEnter={handleCardPointerEnter}
         queuedMultiplier={multipliers[handIndex] ?? 1}
-        result={results[handIndex] ?? null}
+        activeMultiplier={activeMultipliers[handIndex] ?? 1}
+        result={
+          initialHandIsVisible
+            ? initialHandResult
+            : (results[handIndex] ?? null)
+        }
       />
-      {showPlayOverlay && (
-        <div aria-hidden="true" className="play-overlay">
-          PLAY 100 CREDITS
-        </div>
-      )}
     </div>
   );
 }
