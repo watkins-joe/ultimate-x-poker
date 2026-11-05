@@ -22,9 +22,18 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "ITC Bauhaus Medium";
+  src: url("/fonts/ITC%20Bauhaus%20Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --font-casino: "CasinoDisplay", Impact, sans-serif;
   --font-paytable: "Eurostile Black", Impact, sans-serif;
+  --font-bauhaus: "ITC Bauhaus Medium", Arial, sans-serif;
 }
 
 * {
