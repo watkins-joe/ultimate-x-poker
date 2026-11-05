@@ -81,20 +81,14 @@
   flex: 1;
   min-width: 0;
   height: 100%;
-  overflow: visible;
 
   .playing-card {
     display: block;
     width: 100%;
-    height: 100%;
     min-height: 0;
     flex: 1;
-    object-fit: fill;
+    object-fit: contain;
     user-select: none;
-  }
-
-  &.is-held .playing-card {
-    height: calc(100% - 0.85rem);
   }
 
   .hold-badge {
@@ -112,6 +106,10 @@
     text-shadow: 1px 1px 2px #000;
     pointer-events: none;
   }
+}
+
+.cards.has-held-cards .playing-card {
+  max-height: calc(100% - 0.85rem);
 }
 
 .winning-hand-overlay {

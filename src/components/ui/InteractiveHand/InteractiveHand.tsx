@@ -99,6 +99,9 @@ function InteractiveHand({
 
   const initialHandIsVisible =
     isInitialDeal || gameState === GAME_STATES.Awaiting_Holds;
+  const heldCards = initialHand.map((card) =>
+    card.isHeld ? { ...card } : { cardId: null, isHeld: false },
+  );
 
   function renderHand(handIndex: number, isCurrentHand: boolean) {
     const isActiveHand =
@@ -106,10 +109,14 @@ function InteractiveHand({
     const hand =
       isCurrentHand && initialHandIsVisible
         ? initialHand
-        : (hands[handIndex] ?? createEmptyHand());
+        : !isCurrentHand && gameState === GAME_STATES.Awaiting_Holds
+          ? heldCards
+          : (hands[handIndex] ?? createEmptyHand());
+    const hasHeldCards = hand.some((card) => card.isHeld);
     const result = results[handIndex] ?? null;
     const queuedMultiplier = multipliers[handIndex] ?? 1;
     const canSelect = isCurrentHand && gameState === GAME_STATES.Awaiting_Holds;
+    const showHeldStatus = isCurrentHand && hasHeldCards;
     const isWinningHand = result !== null && result.payoutCredits > 0;
     const paylineFrame = isWinningHand
       ? `/assets/ui/payline${Math.min(16, Math.max(1, result.multiplierApplied))}_2.gif`
@@ -130,18 +137,16 @@ function InteractiveHand({
             <span>HOLD</span>
           ) : null}
         </div>
-        <div className={`cards${canSelect ? " is-holding" : ""}`}>
+        <div
+          className={`cards${canSelect ? " is-holding" : ""}${showHeldStatus ? " has-held-cards" : ""}`}
+        >
           {hand.map((card, cardIndex) => {
             const asset =
               card.cardId === null
                 ? { src: "/assets/cards/back.png", alt: "Card Back" }
                 : game.getCardAsset(card.cardId);
-
             return (
-              <div
-                className={`card-container${isCurrentHand && card.isHeld ? " is-held" : ""}`}
-                key={cardIndex}
-              >
+              <div className="card-container" key={cardIndex}>
                 <img
                   alt={asset.alt}
                   className="playing-card"
@@ -154,9 +159,13 @@ function InteractiveHand({
                   }
                   src={asset.src}
                 />
-                {isCurrentHand && card.isHeld && card.cardId !== null && (
-                  <span aria-label="Held" className="hold-badge">
-                    HELD
+                {showHeldStatus && (
+                  <span
+                    aria-label={card.isHeld ? "Held" : undefined}
+                    aria-hidden={!card.isHeld}
+                    className="hold-badge"
+                  >
+                    {card.isHeld ? "HELD" : ""}
                   </span>
                 )}
               </div>

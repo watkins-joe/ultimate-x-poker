@@ -3,6 +3,7 @@
   flex-direction: column;
   justify-content: flex-start;
   width: min(100%, 48rem);
+  height: 100dvh;
   min-height: 100dvh;
   margin: 0 auto;
   padding: max(0.35rem, env(safe-area-inset-top)) 0.55rem
@@ -10,9 +11,6 @@
   gap: 0.35rem;
   position: relative;
   color: #fff;
-  background:
-    linear-gradient(rgba(0, 0, 25, 0.4), rgba(0, 0, 30, 0.85)),
-    url("/assets/ui/uxbg.png") center / 100% 100% no-repeat;
 }
 
 .game-shell {
@@ -30,15 +28,14 @@
   flex: 0 0 auto;
   overflow: hidden;
   padding: 0.45rem 0.35rem;
-  border: 0.3rem solid #0756ff;
-  background:
-    radial-gradient(ellipse at 50% 45%, rgba(0, 31, 120, 0.18), transparent 70%),
-    #020207;
-  box-shadow:
-    0 0 0.3rem #fff,
-    0 0 0.8rem #006aff,
-    0 0 1.5rem #002aff,
-    inset 0 0 0.7rem #006aff;
+}
+
+.game-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: auto;
+  flex: 0 0 auto;
 }
 
 .ultimate-x-indicator {
