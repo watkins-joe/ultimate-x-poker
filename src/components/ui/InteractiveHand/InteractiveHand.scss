@@ -10,14 +10,12 @@
 .interactive-hand-area {
   align-self: center;
   position: relative;
-  max-width: 80%;
+  max-width: 75%;
   flex: 0 0 auto;
 }
 
 .interactive-hand-area .hand-marker {
-  left: -0.6rem;
-  top: 0.25rem;
-  width: 14%;
+  left: -3rem;
 }
 
 .multi-hand-row {
