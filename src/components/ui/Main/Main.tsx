@@ -350,9 +350,14 @@ function Main() {
     setWinCredits(0);
     setHandResults(Array(MULTI_HAND_COUNT).fill(null));
     setInitialHandResult(null);
-    setActiveMultipliers(
-      bet === MAX_BET ? [...multipliers] : Array(MULTI_HAND_COUNT).fill(1),
-    );
+    const bonusIsActive = bet === MAX_BET;
+    const multipliersForDeal = bonusIsActive
+      ? [...multipliers]
+      : Array(MULTI_HAND_COUNT).fill(1);
+    setActiveMultipliers(multipliersForDeal);
+    if (bonusIsActive) {
+      setMultipliers(Array(MULTI_HAND_COUNT).fill(1));
+    }
     setInitialHand(createEmptyHand());
     setHandsState(createEmptyMultiHand());
     setGameState(GAME_STATES.Game_Over);
@@ -369,7 +374,7 @@ function Main() {
           dealtHand,
           bet,
           selectedGame,
-          bet === MAX_BET ? (multipliers[MULTI_HAND_COUNT - 1] ?? 1) : 1,
+          multipliersForDeal[MULTI_HAND_COUNT - 1] ?? 1,
         );
         setInitialHandResult(
           initialResult && initialResult.payoutCredits > 0
@@ -417,12 +422,13 @@ function Main() {
     setHandResults(Array(MULTI_HAND_COUNT).fill(null));
     setInitialHandResult(null);
     setWinCredits(0);
-    setActiveMultipliers(
-      currentBet === MAX_BET ? [...multipliers] : Array(MULTI_HAND_COUNT).fill(1),
-    );
     setGameState(GAME_STATES.Game_Over);
 
     const bonusIsActive = currentBet === MAX_BET;
+    const multipliersForThisDraw = bonusIsActive
+      ? activeMultipliers
+      : Array(MULTI_HAND_COUNT).fill(1);
+
     const results = finalHands.map((hand, handIndex) =>
       handIndex < firstActiveHandIndex
         ? null
@@ -430,7 +436,7 @@ function Main() {
             hand,
             currentBet,
             selectedGame,
-            bonusIsActive ? (multipliers[handIndex] ?? 1) : 1,
+            multipliersForThisDraw[handIndex] ?? 1,
           ),
     );
 
