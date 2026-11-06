@@ -34,34 +34,30 @@ function GameTable({
   const firstActiveHandIndex = MULTI_HAND_COUNT - activeHandCount;
 
   return (
-    <section className="game-shell" aria-label="Nine follow-on hands">
-      <div className="game-table">
-        <div className="hands-grid" aria-label="Nine follow-on hands">
-          {Array.from({ length: MULTI_HAND_COUNT - 1 }, (_, handIndex) => {
-            const isActiveHand = handIndex >= firstActiveHandIndex;
-            const hand =
-              gameState === GAME_STATES.Awaiting_Holds
-                ? heldCards
-                : (hands[handIndex] ?? createEmptyHand());
+    <div className="hands-grid" aria-label="Nine follow-on hands">
+      {Array.from({ length: MULTI_HAND_COUNT - 1 }, (_, handIndex) => {
+        const isActiveHand = handIndex >= firstActiveHandIndex;
+        const hand =
+          gameState === GAME_STATES.Awaiting_Holds
+            ? heldCards
+            : (hands[handIndex] ?? createEmptyHand());
 
-            return (
-              <HandRow
-                canSelect={false}
-                game={game}
-                hand={hand}
-                handIndex={handIndex}
-                isActiveHand={isActiveHand}
-                isCurrentHand={false}
-                key={handIndex}
-                queuedMultiplier={multipliers[handIndex] ?? 1}
-                activeMultiplier={activeMultipliers[handIndex] ?? 1}
-                result={results[handIndex] ?? null}
-              />
-            );
-          })}
-        </div>
-      </div>
-    </section>
+        return (
+          <HandRow
+            canSelect={false}
+            game={game}
+            hand={hand}
+            handIndex={handIndex}
+            isActiveHand={isActiveHand}
+            isCurrentHand={false}
+            key={handIndex}
+            queuedMultiplier={multipliers[handIndex] ?? 1}
+            activeMultiplier={activeMultipliers[handIndex] ?? 1}
+            result={results[handIndex] ?? null}
+          />
+        );
+      })}
+    </div>
   );
 }
 
