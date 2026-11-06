@@ -85,7 +85,7 @@ function HandRow({
       <div className="hand-marker" aria-live="polite">
         {queuedMultiplier > 1 && (
           <div className="queued-hand-multiplier">
-            <div>NEXT HAND</div>
+            <div className="next-hand">NEXT HAND</div>
             <span>{queuedMultiplier}X</span>
           </div>
         )}

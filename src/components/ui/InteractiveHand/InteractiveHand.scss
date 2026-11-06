@@ -11,8 +11,7 @@
 .interactive-hand-area {
   align-self: center;
   position: relative;
-  max-width: 75%;
-  flex: 0 0 auto;
+  max-width: 69%;
 }
 
 .interactive-hand-area .hand-marker {
@@ -24,6 +23,8 @@
   display: flex;
   min-height: 0;
   flex: 1 1 0;
+  justify-content: center;
+  width: 100%;
 
   &.is-inactive {
     opacity: 0.35;
@@ -42,23 +43,24 @@
 }
 
 .hand-marker {
-  position: absolute;
-  left: 1.1rem;
-  top: 0.4rem;
-  width: 14%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  min-width: 0;
+  align-items: self-end;
   color: #ffeb00;
   font-family: var(--font-paytable);
-  font-size: clamp(0.45rem, 1.8vw, 0.7rem);
+  font-size: 0.5rem;
   font-weight: 800;
-  line-height: 1.2;
-  text-align: center;
   text-shadow: 1px 1px 1px #000;
-  height: 3.3rem;
+  position: absolute;
+  display: flex;
+  left: 0;
+  height: 100%;
+  flex-direction: column;
+  justify-content: space-between;
+
+  .next-hand {
+    width: min-content;
+    margin-right: 0.1rem;
+    text-align: center;
+  }
 
   .queued-hand-multiplier {
     display: flex;
@@ -69,7 +71,7 @@
   span {
     font-family: "Korinth Serial Bold";
     font-size: clamp(0.8rem, 3vw, 1.1rem);
-    line-height: 0.8;
+    line-height: 0.85;
   }
 
   .active-hand-multiplier {
