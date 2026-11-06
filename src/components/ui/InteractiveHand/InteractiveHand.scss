@@ -13,7 +13,7 @@
   justify-content: center;
 
   .multi-hand-row {
-    height: 5.7rem;
+    max-height: 5.7rem;
   }
 }
 
@@ -105,12 +105,10 @@
   }
 
   .hold-badge {
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
     position: absolute;
     bottom: -0.8rem;
-    width: 100%;
+    left: 50%;
+    transform: translate(-50%);
     color: #fff;
     font-family: var(--font-paytable);
     font-size: clamp(0.55rem, 2.2vw, 0.85rem);
@@ -119,10 +117,6 @@
     text-shadow: 1px 1px 2px #000;
     pointer-events: none;
   }
-}
-
-.cards.has-held-cards .playing-card {
-  max-height: calc(100% - 0.85rem);
 }
 
 .winning-hand-overlay {
