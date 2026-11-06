@@ -6,12 +6,14 @@
 }
 
 .interactive-hand-area {
+  display: flex;
   align-self: center;
   position: relative;
-  max-width: 69%;
+  width: 100%;
+  justify-content: center;
 
-  .cards {
-    width: unset;
+  .multi-hand-row {
+    height: 5.7rem;
   }
 }
 
@@ -94,13 +96,11 @@
   display: flex;
   position: relative;
   height: 100%;
+  width: fit-content;
 
   .playing-card {
-    display: block;
-    width: 100%;
-    min-height: 0;
+    height: 100%;
     flex: 1;
-    object-fit: contain;
     user-select: none;
   }
 
