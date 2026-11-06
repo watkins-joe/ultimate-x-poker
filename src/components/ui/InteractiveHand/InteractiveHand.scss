@@ -12,6 +12,10 @@
   align-self: center;
   position: relative;
   max-width: 69%;
+
+  .cards {
+    width: unset;
+  }
 }
 
 .interactive-hand-area .hand-marker {
@@ -87,6 +91,7 @@
   justify-content: center;
   gap: 0.2rem;
   height: 100%;
+  width: min(72%, 26rem);
 }
 
 .card-container {
