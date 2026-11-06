@@ -55,7 +55,6 @@
 
 .paytable-modal {
   width: min(100%, 40rem);
-  min-height: min(88dvh, 60rem);
   justify-content: space-between;
   padding: 1.35rem 1.2rem 1rem;
 
@@ -93,7 +92,6 @@
 
 @media (min-height: 50rem) {
   .paytable-modal {
-    min-height: 84dvh;
     padding: 1.7rem 1.4rem 1.2rem;
   }
 
