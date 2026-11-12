@@ -45,7 +45,13 @@ export type Denomination =
   | "500d"
   | "1000d"
   | "2000d"
-  | "5000d";
+  | "5000d"
+  | "50000d"
+  | "100000d"
+  | "250000d"
+  | "1000000d"
+  | "2000000d"
+  | "5000000d";
 
 export const DENOMINATIONS: Record<Denomination, DenomInfo> = {
   "1c": { valueCents: 1, image: "1c.png" },
@@ -64,4 +70,10 @@ export const DENOMINATIONS: Record<Denomination, DenomInfo> = {
   "1000d": { valueCents: 100000, image: "1000d.png" },
   "2000d": { valueCents: 200000, image: "2000d.png" },
   "5000d": { valueCents: 500000, image: "5000d.png" },
+  "50000d": { valueCents: 5000000, image: "50000d.png" },
+  "100000d": { valueCents: 10000000, image: "100000d.png" },
+  "250000d": { valueCents: 25000000, image: "250000d.png" },
+  "1000000d": { valueCents: 100000000, image: "1000000d.png" },
+  "2000000d": { valueCents: 200000000, image: "2000000d.png" },
+  "5000000d": { valueCents: 500000000, image: "5000000d.png" },
 } as const;

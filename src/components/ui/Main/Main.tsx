@@ -484,13 +484,12 @@ function Main() {
             ...current,
             [denomination]: {
               ...current[denomination],
-              queued: current[denomination].queued.map(
-                (multiplier, index) =>
-                  index === handIndex && result.payoutCredits > 0
-                    ? (selectedGame.multiplierByHand[result.rank] ?? 1)
-                    : index === handIndex
-                      ? 1
-                      : multiplier,
+              queued: current[denomination].queued.map((multiplier, index) =>
+                index === handIndex && result.payoutCredits > 0
+                  ? (selectedGame.multiplierByHand[result.rank] ?? 1)
+                  : index === handIndex
+                    ? 1
+                    : multiplier,
               ),
             },
           }));
