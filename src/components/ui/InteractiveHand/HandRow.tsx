@@ -77,6 +77,8 @@ function HandRow({
     ? WINNING_HAND_ACCENTS[result.rank]
     : undefined;
 
+  console.log(result?.title);
+
   return (
     <div
       className={`multi-hand-row${canSelect ? " is-selectable" : ""}${isActiveHand ? "" : " is-inactive"}`}
@@ -139,7 +141,7 @@ function HandRow({
             className={`winning-hand-overlay winning-hand-overlay--${overlayAccent}`}
             role="status"
           >
-            <span>{result.title.toLowerCase()}</span>
+            <span>{result.title}</span>
             <strong>
               {result.multiplierApplied > 1
                 ? `${result.multiplierApplied} x ${result.basePayoutCredits} = ${result.payoutCredits}`
