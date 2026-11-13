@@ -20,12 +20,7 @@ interface PaytableModalProps {
   onClose: () => void;
 }
 
-function PaytableModal({
-  game,
-  bet,
-  winningHands,
-  onClose,
-}: PaytableModalProps) {
+function PaytableModal({ game, bet, onClose }: PaytableModalProps) {
   const [showMultipliers, setShowMultipliers] = useState(false);
   const [coin, setCoin] = useState<BaseBetAmount>(() =>
     getPaytableBetAmount(bet),
@@ -46,12 +41,7 @@ function PaytableModal({
       title={title}
     >
       <div className="paytable-modal-content">
-        <Paytable
-          coin={coin}
-          game={game}
-          showMultipliers={showMultipliers}
-          winningHands={winningHands}
-        />
+        <Paytable coin={coin} game={game} showMultipliers={showMultipliers} />
         <div className="paytable-rules">
           <p>Bet max credits per hand to activate the Ultimate X feature.</p>
           <p>A multiplier is awarded for a winning hand.</p>

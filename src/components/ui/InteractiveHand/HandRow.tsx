@@ -77,8 +77,6 @@ function HandRow({
     ? WINNING_HAND_ACCENTS[result.rank]
     : undefined;
 
-  console.log(result?.title);
-
   return (
     <div
       className={`multi-hand-row${canSelect ? " is-selectable" : ""}${isActiveHand ? "" : " is-inactive"}`}

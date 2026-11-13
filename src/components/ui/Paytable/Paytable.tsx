@@ -1,15 +1,14 @@
 import type { BaseBetAmount } from "../../../config/gameConfig";
-import type { GameDefinition, HandRank } from "../../../config/games";
+import type { GameDefinition } from "../../../config/games";
 import "./Paytable.scss";
 
 interface PaytableProps {
   game: GameDefinition;
   coin: BaseBetAmount;
-  winningHands: readonly HandRank[];
   showMultipliers: boolean;
 }
 
-function Paytable({ game, coin, winningHands, showMultipliers }: PaytableProps) {
+function Paytable({ game, coin, showMultipliers }: PaytableProps) {
   const payoutHands = Object.keys(game.handNames);
 
   return (
@@ -18,21 +17,14 @@ function Paytable({ game, coin, winningHands, showMultipliers }: PaytableProps) 
         <div className="paytable-column paytable-hands">
           {payoutHands.map((hand) => (
             <div className="paytable-hand" key={hand}>
-              <span className={winningHands.includes(hand) ? "is-winning" : ""}>
-                {game.handNames[hand]}
-              </span>
+              <span>{game.handNames[hand].toUpperCase()}</span>
               <span className="paytable-leader" aria-hidden="true" />
             </div>
           ))}
         </div>
         <div className="paytable-column paytable-values">
           {payoutHands.map((hand) => (
-            <div
-              className={`paytable-payout${
-                winningHands.includes(hand) ? " is-winning" : ""
-              }`}
-              key={hand}
-            >
+            <div className="paytable-payout" key={hand}>
               {showMultipliers
                 ? game.multiplierByHand[hand] === undefined
                   ? "-"

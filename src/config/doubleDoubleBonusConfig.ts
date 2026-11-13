@@ -32,7 +32,7 @@ export const HAND_DISPLAY_NAMES = {
   [HAND_TYPES.STRAIGHT]: "Straight",
   [HAND_TYPES.THREE_OF_A_KIND]: "3 of a Kind",
   [HAND_TYPES.TWO_PAIR]: "Two Pair",
-  [HAND_TYPES.JACKS_OR_BETTER]: "Jack or Better",
+  [HAND_TYPES.JACKS_OR_BETTER]: "Jacks or Better",
 };
 
 type WinningHand = Exclude<
