@@ -1,14 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import {
   BETTING_OPTIONS,
-  DEFAULT_BETTING_INDEX,
   DENOMINATIONS,
   GAME_STATES,
   getActiveHandCount,
   getPaytableBetAmount,
   type BetAmount,
   type Denomination,
-  type GameState,
 } from "../../../config/gameConfig";
 import {
   DEFAULT_GAME_ID,
@@ -18,7 +16,6 @@ import {
 } from "../../../config/games";
 import {
   createEmptyHand,
-  createEmptyMultiHand,
   INITIAL_HAND_STATE,
   MULTI_HAND_COUNT,
   type INITIAL_HAND_STATE_TYPE,
@@ -34,6 +31,10 @@ import {
 import { CARDS, shuffle } from "../../../utils/cards";
 import { DEUCES_WILD_DEBUG_HAND_BATCHES } from "../../../utils/deucesWildDebugHands";
 import { soundManager } from "../../../utils/soundManager";
+import {
+  createGameDataState,
+  gameDataReducer,
+} from "./gameStateReducer";
 import DenomModal from "../DenomModal/DenomModal";
 import GameBottomArea from "../GameBottomArea/GameBottomArea";
 import GameFooter from "../GameFooter/GameFooter";
@@ -55,26 +56,6 @@ const BASE_PAYOUT_COUNT_UP_MS = 500;
 const PAYOUT_COUNT_UP_PER_CREDIT_MS = 8;
 const MAX_PAYOUT_COUNT_UP_MS = 4000;
 const MAX_BET = BETTING_OPTIONS[BETTING_OPTIONS.length - 1];
-
-interface DenominationMultipliers {
-  queued: number[];
-  active: number[];
-}
-
-function createDenominationMultipliers(): Record<
-  Denomination,
-  DenominationMultipliers
-> {
-  return Object.fromEntries(
-    (Object.keys(DENOMINATIONS) as Denomination[]).map((denomination) => [
-      denomination,
-      {
-        queued: Array(MULTI_HAND_COUNT).fill(1),
-        active: Array(MULTI_HAND_COUNT).fill(1),
-      },
-    ]),
-  ) as Record<Denomination, DenominationMultipliers>;
-}
 
 function getInitialBalanceCents(): number {
   try {
@@ -105,36 +86,36 @@ function getInitialGame(): GameId {
 
 function Main() {
   const [isCreditsMode, setIsCreditsMode] = useState(true);
-  const [selectedGameId, setSelectedGameId] = useState<GameId>(getInitialGame);
-  const [denomination, setDenomination] = useState<Denomination>(
-    getInitialDenomination,
-  );
-  const [currentBet, setCurrentBet] = useState<BetAmount>(
-    BETTING_OPTIONS[DEFAULT_BETTING_INDEX],
-  );
-  const [balanceCents, setBalanceCents] = useState(getInitialBalanceCents);
-  const [displayBalanceCents, setDisplayBalanceCents] = useState(balanceCents);
-  const [winCredits, setWinCredits] = useState(0);
-  const [gameState, setGameState] = useState<GameState>(GAME_STATES.Game_Over);
-  const [initialHand, setInitialHand] = useState<INITIAL_HAND_STATE_TYPE>(() =>
-    createEmptyHand(),
-  );
-  const [handsState, setHandsState] =
-    useState<INITIAL_HAND_STATE_TYPE[]>(createEmptyMultiHand);
-  const [multipliersByDenomination, setMultipliersByDenomination] = useState(
-    createDenominationMultipliers,
-  );
-  const [handResults, setHandResults] = useState<(HandResult | null)[]>(() =>
-    Array(MULTI_HAND_COUNT).fill(null),
-  );
-  const [initialHandResult, setInitialHandResult] = useState<HandResult | null>(
+  const [gameData, dispatch] = useReducer(
+    gameDataReducer,
     null,
+    () =>
+      createGameDataState(
+        getInitialGame(),
+        getInitialDenomination(),
+        getInitialBalanceCents(),
+      ),
   );
-  const [hasResolvedAllHands, setHasResolvedAllHands] = useState(false);
-  const [isInitialDeal, setIsInitialDeal] = useState(false);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [isResolvingDraw, setIsResolvingDraw] = useState(false);
-  const [isBetting, setIsBetting] = useState(false);
+  const {
+    selectedGameId,
+    denomination,
+    currentBet,
+    balanceCents,
+    displayBalanceCents,
+    winCredits,
+    gameState,
+    initialHand,
+    handsState,
+    multipliersByDenomination,
+    handResults,
+    initialHandResult,
+    hasResolvedAllHands,
+    isInitialDeal,
+    isDrawing,
+    isResolvingDraw,
+    isBetting,
+    isCountingPayout,
+  } = gameData;
   const [activeModal, setActiveModal] = useState<
     "denomination" | "game-selection" | "paytable" | null
   >(null);
@@ -145,7 +126,6 @@ function Main() {
   const resetConfirmationTimeoutRef = useRef<number | null>(null);
   const [isResetConfirmationActive, setIsResetConfirmationActive] =
     useState(false);
-  const [isCountingPayout, setIsCountingPayout] = useState(false);
   const debugDealBatchRef = useRef(0);
   const previousCategorySoundRef = useRef<number | null>(null);
   const debugHandsForDrawRef = useRef<readonly (readonly number[])[] | null>(
@@ -256,7 +236,7 @@ function Main() {
 
   function changeBet(amount: BetAmount) {
     if (isRoundActive) return;
-    setCurrentBet(amount);
+    dispatch({ type: "bet-changed", bet: amount });
   }
 
   function toggleCreditsMode() {
@@ -280,21 +260,17 @@ function Main() {
       resetConfirmationTimeoutRef.current = null;
     }
     setIsResetConfirmationActive(false);
-    setBalanceCents(STARTING_BALANCE_CENTS);
-    setDisplayBalanceCents(STARTING_BALANCE_CENTS);
+    dispatch({
+      type: "balance-reset",
+      balanceCents: STARTING_BALANCE_CENTS,
+    });
   }
 
   function showInitialCards(
     cards: INITIAL_HAND_STATE_TYPE,
     onComplete: () => void,
   ) {
-    setInitialHand(
-      cards.map((card) =>
-        card.isHeld ? { ...card } : { cardId: null, isHeld: false },
-      ),
-    );
-    setIsInitialDeal(true);
-    setIsDrawing(true);
+    dispatch({ type: "initial-deal-started", cards });
 
     const cardsToReveal = cards.flatMap((card, index) =>
       card.isHeld ? [] : [index],
@@ -304,18 +280,16 @@ function Main() {
       const cardIndex = cardsToReveal[revealIndex];
       if (cardIndex === undefined) {
         dealTimeoutRef.current = null;
-        setIsDrawing(false);
-        setIsInitialDeal(false);
         onComplete();
         return;
       }
 
       soundManager.play("carddealt");
-      setInitialHand((current) =>
-        current.map((card, index) =>
-          index === cardIndex ? { ...cards[cardIndex] } : card,
-        ),
-      );
+      dispatch({
+        type: "initial-card-revealed",
+        cardIndex,
+        card: cards[cardIndex],
+      });
       revealIndex += 1;
       dealTimeoutRef.current = window.setTimeout(
         revealNext,
@@ -355,9 +329,7 @@ function Main() {
       onHandResolved(handIndex);
     };
 
-    setHandsState(hiddenHands);
-    setIsDrawing(true);
-    setIsResolvingDraw(true);
+    dispatch({ type: "draw-hands-started", hands: hiddenHands });
     drawRevealDelayRef.current = DRAW_CARD_DELAY_MS;
     remainingCardsByHand.forEach((remainingCards, handIndex) => {
       if (remainingCards === 0) resolveHand(handIndex);
@@ -368,23 +340,16 @@ function Main() {
       if (nextCard === undefined) {
         dealTimeoutRef.current = null;
         drawRevealNextRef.current = null;
-        setIsDrawing(false);
-        setIsResolvingDraw(false);
         onComplete();
         return;
       }
 
-      setHandsState((current) =>
-        current.map((hand, handIndex) =>
-          handIndex !== nextCard.handIndex
-            ? hand
-            : hand.map((card, cardIndex) =>
-                cardIndex === nextCard.cardIndex
-                  ? { ...hands[handIndex][cardIndex] }
-                  : card,
-              ),
-        ),
-      );
+      dispatch({
+        type: "draw-card-revealed",
+        handIndex: nextCard.handIndex,
+        cardIndex: nextCard.cardIndex,
+        card: hands[nextCard.handIndex][nextCard.cardIndex],
+      });
       remainingCardsByHand[nextCard.handIndex] -= 1;
       if (remainingCardsByHand[nextCard.handIndex] === 0) {
         resolveHand(nextCard.handIndex);
@@ -454,30 +419,18 @@ function Main() {
     }
 
     playBoardMultiplierSound();
-    setCurrentBet(bet);
-    setBalanceCents((balance) => balance - wagerCostCents);
-    setDisplayBalanceCents((balance) => balance - wagerCostCents);
-    setWinCredits(0);
-    setHandResults(Array(MULTI_HAND_COUNT).fill(null));
-    setInitialHandResult(null);
-    setHasResolvedAllHands(false);
     const bonusIsActive = bet === MAX_BET;
     const multipliersForDeal = bonusIsActive
       ? [...multipliers]
       : Array(MULTI_HAND_COUNT).fill(1);
-    setMultipliersByDenomination((current) => ({
-      ...current,
-      [denomination]: {
-        queued: bonusIsActive
-          ? Array(MULTI_HAND_COUNT).fill(1)
-          : current[denomination].queued,
-        active: multipliersForDeal,
-      },
-    }));
-    setInitialHand(createEmptyHand());
-    setHandsState(createEmptyMultiHand());
-    setGameState(GAME_STATES.Game_Over);
-    setIsBetting(true);
+    dispatch({
+      type: "deal-started",
+      bet,
+      denomination,
+      wagerCostCents,
+      multipliersForDeal,
+      resetQueuedMultipliers: bonusIsActive,
+    });
     if (isDeucesWildRankDebug) {
       debugHandsForDrawRef.current =
         DEUCES_WILD_DEBUG_HAND_BATCHES[
@@ -489,7 +442,7 @@ function Main() {
     }
 
     const dealCards = () => {
-      setIsBetting(false);
+      dispatch({ type: "deal-betting-finished" });
       const dealtCardIds = isDeucesWildRankDebug
         ? [1, 16, 31, 46, 11]
         : shuffle(CARDS).slice(0, INITIAL_HAND_STATE.length);
@@ -508,12 +461,13 @@ function Main() {
         if (initialResult && initialResult.payoutCredits > 0) {
           soundManager.play("win");
         }
-        setInitialHandResult(
-          initialResult && initialResult.payoutCredits > 0
-            ? initialResult
-            : null,
-        );
-        setGameState(GAME_STATES.Awaiting_Holds);
+        dispatch({
+          type: "initial-deal-finished",
+          result:
+            initialResult && initialResult.payoutCredits > 0
+              ? initialResult
+              : null,
+        });
       });
     };
 
@@ -560,11 +514,7 @@ function Main() {
         });
     debugHandsForDrawRef.current = null;
 
-    setHandResults(Array(MULTI_HAND_COUNT).fill(null));
-    setInitialHandResult(null);
-    setHasResolvedAllHands(false);
-    setWinCredits(0);
-    setGameState(GAME_STATES.Game_Over);
+    dispatch({ type: "draw-started" });
 
     const bonusIsActive = currentBet === MAX_BET;
     const multipliersForThisDraw = bonusIsActive
@@ -593,39 +543,27 @@ function Main() {
           playRandomHandCategorySound();
         }
 
-        setHandResults((current) =>
-          current.map((existing, index) =>
-            index === handIndex ? result : existing,
-          ),
-        );
-        if (bonusIsActive) {
-          setMultipliersByDenomination((current) => ({
-            ...current,
-            [denomination]: {
-              ...current[denomination],
-              queued: current[denomination].queued.map((multiplier, index) =>
-                index === handIndex && result.payoutCredits > 0
-                  ? (selectedGame.multiplierByHand[result.rank] ?? 1)
-                  : index === handIndex
-                    ? 1
-                    : multiplier,
-              ),
-            },
-          }));
-        }
+        dispatch({
+          type: "hand-resolved",
+          denomination,
+          handIndex,
+          result,
+          updateMultiplier: bonusIsActive,
+          nextMultiplier: selectedGame.multiplierByHand[result.rank] ?? 1,
+        });
       },
       () => {
-        setHasResolvedAllHands(true);
         const totalWinCredits = results.reduce(
           (total, result) => total + (result?.payoutCredits ?? 0),
           0,
         );
 
         const payoutCents = totalWinCredits * denominationValueCents;
-        setBalanceCents((balance) => balance + payoutCents);
+        dispatch({
+          type: "draw-finished",
+          payoutCents,
+        });
         if (payoutCents === 0) {
-          setWinCredits(0);
-          setIsCountingPayout(false);
           return;
         }
 
@@ -636,15 +574,17 @@ function Main() {
           BASE_PAYOUT_COUNT_UP_MS +
             totalWinCredits * PAYOUT_COUNT_UP_PER_CREDIT_MS,
         );
-        setIsCountingPayout(true);
         soundManager.playLoop("creditCount");
 
         const countUp = (currentTime: number) => {
           const progress = Math.min((currentTime - startTime) / duration, 1);
-          setWinCredits(Math.floor(totalWinCredits * progress));
-          setDisplayBalanceCents(
-            Math.round(startingBalanceCents + payoutCents * progress),
-          );
+          dispatch({
+            type: "payout-progressed",
+            winCredits: Math.floor(totalWinCredits * progress),
+            displayBalanceCents: Math.round(
+              startingBalanceCents + payoutCents * progress,
+            ),
+          });
 
           if (progress < 1) {
             payoutAnimationFrameRef.current = requestAnimationFrame(countUp);
@@ -652,9 +592,11 @@ function Main() {
             payoutAnimationFrameRef.current = null;
             soundManager.stopLoop("creditCount");
             soundManager.play("creditCountEnd");
-            setWinCredits(totalWinCredits);
-            setDisplayBalanceCents(startingBalanceCents + payoutCents);
-            setIsCountingPayout(false);
+            dispatch({
+              type: "payout-finished",
+              winCredits: totalWinCredits,
+              displayBalanceCents: startingBalanceCents + payoutCents,
+            });
           }
         };
 
@@ -666,32 +608,22 @@ function Main() {
   function handleCardClick(positionIndex: number) {
     if (gameState !== GAME_STATES.Awaiting_Holds || isDrawing) return;
     soundManager.play("hold");
-    setInitialHandResult(null);
-    setInitialHand((cards) =>
-      cards.map((card, index) =>
-        index === positionIndex ? { ...card, isHeld: !card.isHeld } : card,
-      ),
-    );
+    dispatch({ type: "card-held", cardIndex: positionIndex });
   }
 
   function handleGameSelect(gameId: GameId) {
     if (isRoundActive) return;
 
-    setSelectedGameId(gameId);
-    setHandResults(Array(MULTI_HAND_COUNT).fill(null));
-    setInitialHandResult(null);
-    setHasResolvedAllHands(false);
-    setInitialHand(createEmptyHand());
-    setHandsState(createEmptyMultiHand());
-    setMultipliersByDenomination(createDenominationMultipliers());
-    setWinCredits(0);
-    setGameState(GAME_STATES.Game_Over);
+    dispatch({ type: "game-selected", gameId });
     setActiveModal(null);
   }
 
   function handleDenominationChange(nextDenomination: Denomination) {
     if (isRoundActive) return;
-    setDenomination(nextDenomination);
+    dispatch({
+      type: "denomination-changed",
+      denomination: nextDenomination,
+    });
   }
 
   const isRoundActive =
