@@ -1,7 +1,17 @@
 const SOUND_URLS = {
+  click: "/assets/sounds/click.ogg",
   carddealt: "/assets/sounds/carddealt.ogg",
   hold: "/assets/sounds/hold1r.ogg",
   loser: "/assets/sounds/loser1.ogg",
+  win: "/assets/sounds/win.ogg",
+  cate1: "/assets/sounds/cate1r.ogg",
+  cate2: "/assets/sounds/cate2r.ogg",
+  cate5: "/assets/sounds/cate5r.ogg",
+  cate6: "/assets/sounds/cate6r.ogg",
+  cate9: "/assets/sounds/cate9r.ogg",
+  cate13: "/assets/sounds/cate13r.ogg",
+  creditCount: "/assets/sounds/crdtlp2r.ogg",
+  creditCountEnd: "/assets/sounds/lstone2r.ogg",
 } as const;
 
 type SoundKey = keyof typeof SOUND_URLS;
@@ -10,6 +20,7 @@ class SoundManager {
   private context: AudioContext | null = null;
   private readonly buffers = new Map<SoundKey, AudioBuffer>();
   private readonly pendingLoads = new Map<SoundKey, Promise<void>>();
+  private readonly loopingSources = new Map<SoundKey, AudioBufferSourceNode>();
   private isUnlocked = false;
 
   private getContext(): AudioContext {
@@ -81,6 +92,44 @@ class SoundManager {
     } catch (error) {
       console.error(`Unable to play sound "${key}".`, error);
     }
+  }
+
+  playLoop(key: SoundKey, volume = 0.5): void {
+    try {
+      const buffer = this.buffers.get(key);
+      if (!buffer) {
+        console.warn(`Sound "${key}" is not preloaded yet.`);
+        return;
+      }
+
+      const context = this.getContext();
+      if (context.state === "suspended") {
+        console.warn(`Sound "${key}" cannot play before audio is unlocked.`);
+        return;
+      }
+
+      this.stopLoop(key);
+      const source = context.createBufferSource();
+      const gain = context.createGain();
+      source.buffer = buffer;
+      source.loop = true;
+      gain.gain.value = volume;
+      source.connect(gain);
+      gain.connect(context.destination);
+      source.start();
+      this.loopingSources.set(key, source);
+    } catch (error) {
+      console.error(`Unable to loop sound "${key}".`, error);
+    }
+  }
+
+  stopLoop(key: SoundKey): void {
+    const source = this.loopingSources.get(key);
+    if (!source) return;
+
+    this.loopingSources.delete(key);
+    source.stop();
+    source.disconnect();
   }
 
   private async preload(key: SoundKey): Promise<void> {

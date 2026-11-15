@@ -143,6 +143,7 @@ function Main() {
     useState(false);
   const [isCountingPayout, setIsCountingPayout] = useState(false);
   const debugDealBatchRef = useRef(0);
+  const previousCategorySoundRef = useRef<number | null>(null);
   const debugHandsForDrawRef = useRef<readonly (readonly number[])[] | null>(
     null,
   );
@@ -156,6 +157,14 @@ function Main() {
   const multipliers = multipliersByDenomination[denomination].queued;
   const activeMultipliers = multipliersByDenomination[denomination].active;
   const isUltimateXActive = currentBet === MAX_BET;
+  const categorySounds = [
+    "cate1",
+    "cate2",
+    "cate5",
+    "cate6",
+    "cate9",
+    "cate13",
+  ] as const;
   const isDeucesWildRankDebug =
     new URLSearchParams(window.location.search).get("debug") ===
       "deuces-wild-ranks" &&
@@ -163,6 +172,19 @@ function Main() {
   const activeHandCount = isDeucesWildRankDebug
     ? MULTI_HAND_COUNT
     : getActiveHandCount(currentBet);
+
+  function playRandomHandCategorySound() {
+    const previousIndex = previousCategorySoundRef.current;
+    const availableIndices = categorySounds.flatMap((_, index) =>
+      index === previousIndex ? [] : [index],
+    );
+    const selectedIndex =
+      availableIndices[Math.floor(Math.random() * availableIndices.length)];
+    if (selectedIndex === undefined) return;
+
+    previousCategorySoundRef.current = selectedIndex;
+    soundManager.play(categorySounds[selectedIndex]);
+  }
 
   useEffect(
     () => () => {
@@ -175,6 +197,7 @@ function Main() {
       if (resetConfirmationTimeoutRef.current !== null) {
         window.clearTimeout(resetConfirmationTimeoutRef.current);
       }
+      soundManager.stopLoop("creditCount");
     },
     [],
   );
@@ -428,6 +451,9 @@ function Main() {
           selectedGame,
           multipliersForDeal[MULTI_HAND_COUNT - 1] ?? 1,
         );
+        if (initialResult && initialResult.payoutCredits > 0) {
+          soundManager.play("win");
+        }
         setInitialHandResult(
           initialResult && initialResult.payoutCredits > 0
             ? initialResult
@@ -509,6 +535,8 @@ function Main() {
         if (result === null || result === undefined) return;
         if (result.payoutCredits === 0) {
           soundManager.play("loser");
+        } else {
+          playRandomHandCategorySound();
         }
 
         setHandResults((current) =>
@@ -555,6 +583,7 @@ function Main() {
             totalWinCredits * PAYOUT_COUNT_UP_PER_CREDIT_MS,
         );
         setIsCountingPayout(true);
+        soundManager.playLoop("creditCount");
 
         const countUp = (currentTime: number) => {
           const progress = Math.min((currentTime - startTime) / duration, 1);
@@ -567,6 +596,8 @@ function Main() {
             payoutAnimationFrameRef.current = requestAnimationFrame(countUp);
           } else {
             payoutAnimationFrameRef.current = null;
+            soundManager.stopLoop("creditCount");
+            soundManager.play("creditCountEnd");
             setWinCredits(totalWinCredits);
             setDisplayBalanceCents(startingBalanceCents + payoutCents);
             setIsCountingPayout(false);
