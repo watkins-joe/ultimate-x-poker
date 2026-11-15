@@ -32,6 +32,8 @@ import {
   saveSelectedGame,
 } from "../../../utils/balanceStorage";
 import { CARDS, shuffle } from "../../../utils/cards";
+import { DEUCES_WILD_DEBUG_HAND_BATCHES } from "../../../utils/deucesWildDebugHands";
+import { soundManager } from "../../../utils/soundManager";
 import DenomModal from "../DenomModal/DenomModal";
 import GameBottomArea from "../GameBottomArea/GameBottomArea";
 import GameFooter from "../GameFooter/GameFooter";
@@ -140,6 +142,10 @@ function Main() {
   const [isResetConfirmationActive, setIsResetConfirmationActive] =
     useState(false);
   const [isCountingPayout, setIsCountingPayout] = useState(false);
+  const debugDealBatchRef = useRef(0);
+  const debugHandsForDrawRef = useRef<readonly (readonly number[])[] | null>(
+    null,
+  );
 
   const denominationValueCents = DENOMINATIONS[denomination].valueCents;
   const selectedGame = GAMES[selectedGameId];
@@ -150,7 +156,13 @@ function Main() {
   const multipliers = multipliersByDenomination[denomination].queued;
   const activeMultipliers = multipliersByDenomination[denomination].active;
   const isUltimateXActive = currentBet === MAX_BET;
-  const activeHandCount = getActiveHandCount(currentBet);
+  const isDeucesWildRankDebug =
+    new URLSearchParams(window.location.search).get("debug") ===
+      "deuces-wild-ranks" &&
+    selectedGameId === "deuces-wild-double-bonus";
+  const activeHandCount = isDeucesWildRankDebug
+    ? MULTI_HAND_COUNT
+    : getActiveHandCount(currentBet);
 
   useEffect(
     () => () => {
@@ -247,6 +259,7 @@ function Main() {
         return;
       }
 
+      soundManager.play("carddealt");
       setInitialHand((current) =>
         current.map((card, index) =>
           index === cardIndex ? { ...cards[cardIndex] } : card,
@@ -389,11 +402,23 @@ function Main() {
     setHandsState(createEmptyMultiHand());
     setGameState(GAME_STATES.Game_Over);
     setIsBetting(true);
+    if (isDeucesWildRankDebug) {
+      debugHandsForDrawRef.current =
+        DEUCES_WILD_DEBUG_HAND_BATCHES[
+          debugDealBatchRef.current %
+            DEUCES_WILD_DEBUG_HAND_BATCHES.length
+        ] ?? null;
+      debugDealBatchRef.current += 1;
+    } else {
+      debugHandsForDrawRef.current = null;
+    }
 
     const dealCards = () => {
       setIsBetting(false);
-      const dealtHand = shuffle(CARDS)
-        .slice(0, INITIAL_HAND_STATE.length)
+      const dealtCardIds = isDeucesWildRankDebug
+        ? [1, 16, 31, 46, 11]
+        : shuffle(CARDS).slice(0, INITIAL_HAND_STATE.length);
+      const dealtHand = dealtCardIds
         .map((cardId) => ({ cardId, isHeld: false }));
 
       showInitialCards(dealtHand, () => {
@@ -429,22 +454,31 @@ function Main() {
         card.cardId === null ? [] : [card.cardId],
       ),
     );
-    const firstActiveHandIndex = MULTI_HAND_COUNT - activeHandCount;
-    const finalHands = Array.from(
-      { length: MULTI_HAND_COUNT },
-      (_, handIndex) => {
-        if (handIndex < firstActiveHandIndex) return createEmptyHand();
+    const debugHands = debugHandsForDrawRef.current;
+    const firstActiveHandIndex = isDeucesWildRankDebug
+      ? 0
+      : MULTI_HAND_COUNT - activeHandCount;
+    const finalHands = debugHands
+      ? Array.from({ length: MULTI_HAND_COUNT }, (_, handIndex) => {
+          const debugHandIndex = MULTI_HAND_COUNT - handIndex - 1;
+          const cardIds = debugHands[debugHandIndex];
+          return cardIds
+            ? cardIds.map((cardId) => ({ cardId, isHeld: false }))
+            : createEmptyHand();
+        })
+      : Array.from({ length: MULTI_HAND_COUNT }, (_, handIndex) => {
+          if (handIndex < firstActiveHandIndex) return createEmptyHand();
 
-        const replacementCards = shuffle(
-          CARDS.filter((cardId) => !initialCardIds.has(cardId)),
-        );
-        return initialHand.map((card) =>
-          card.isHeld
-            ? { ...card }
-            : { cardId: replacementCards.pop() ?? null, isHeld: false },
-        );
-      },
-    );
+          const replacementCards = shuffle(
+            CARDS.filter((cardId) => !initialCardIds.has(cardId)),
+          );
+          return initialHand.map((card) =>
+            card.isHeld
+              ? { ...card }
+              : { cardId: replacementCards.pop() ?? null, isHeld: false },
+          );
+        });
+    debugHandsForDrawRef.current = null;
 
     setHandResults(Array(MULTI_HAND_COUNT).fill(null));
     setInitialHandResult(null);
@@ -473,6 +507,9 @@ function Main() {
       (handIndex) => {
         const result = results[handIndex];
         if (result === null || result === undefined) return;
+        if (result.payoutCredits === 0) {
+          soundManager.play("loser");
+        }
 
         setHandResults((current) =>
           current.map((existing, index) =>
@@ -543,6 +580,7 @@ function Main() {
 
   function handleCardClick(positionIndex: number) {
     if (gameState !== GAME_STATES.Awaiting_Holds || isDrawing) return;
+    soundManager.play("hold");
     setInitialHand((cards) =>
       cards.map((card, index) =>
         index === positionIndex ? { ...card, isHeld: !card.isHeld } : card,
