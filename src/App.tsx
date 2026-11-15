@@ -7,12 +7,11 @@ function App() {
     void soundManager.preloadAll();
 
     const playButtonClick = (event: MouseEvent) => {
-      if (
-        event.target instanceof Element &&
-        event.target.closest("button:not(:disabled)")
-      ) {
-        soundManager.play("click");
-      }
+      if (!(event.target instanceof Element)) return;
+      const button = event.target.closest("button:not(:disabled)");
+      if (!button) return;
+
+      soundManager.play(button.getAttribute("data-sound") === "maxBet" ? "maxBet" : "click");
     };
 
     const unlockAudio = () => {

@@ -47,8 +47,9 @@ import "./Main.scss";
 
 const DEFAULT_DENOMINATION: Denomination = "25c";
 const STARTING_BALANCE_CENTS = 100_000;
-const DEAL_CARD_DELAY_MS = 120;
-const DRAW_CARD_DELAY_MS = 35;
+const DEAL_CARD_DELAY_MS = 100;
+const DRAW_CARD_DELAY_MS = 100;
+const FAST_DRAW_CARD_DELAY_MS = 10;
 const RESET_CONFIRMATION_TIMEOUT_MS = 5000;
 const BASE_PAYOUT_COUNT_UP_MS = 500;
 const PAYOUT_COUNT_UP_PER_CREDIT_MS = 8;
@@ -132,11 +133,14 @@ function Main() {
   const [hasResolvedAllHands, setHasResolvedAllHands] = useState(false);
   const [isInitialDeal, setIsInitialDeal] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [isResolvingDraw, setIsResolvingDraw] = useState(false);
   const [isBetting, setIsBetting] = useState(false);
   const [activeModal, setActiveModal] = useState<
     "denomination" | "game-selection" | "paytable" | null
   >(null);
   const dealTimeoutRef = useRef<number | null>(null);
+  const drawRevealNextRef = useRef<(() => void) | null>(null);
+  const drawRevealDelayRef = useRef(DRAW_CARD_DELAY_MS);
   const payoutAnimationFrameRef = useRef<number | null>(null);
   const resetConfirmationTimeoutRef = useRef<number | null>(null);
   const [isResetConfirmationActive, setIsResetConfirmationActive] =
@@ -167,8 +171,7 @@ function Main() {
   ] as const;
   const isDeucesWildRankDebug =
     new URLSearchParams(window.location.search).get("debug") ===
-      "deuces-wild-ranks" &&
-    selectedGameId === "deuces-wild-double-bonus";
+      "deuces-wild-ranks" && selectedGameId === "deuces-wild-double-bonus";
   const activeHandCount = isDeucesWildRankDebug
     ? MULTI_HAND_COUNT
     : getActiveHandCount(currentBet);
@@ -184,6 +187,19 @@ function Main() {
 
     previousCategorySoundRef.current = selectedIndex;
     soundManager.play(categorySounds[selectedIndex]);
+  }
+
+  function playBoardMultiplierSound() {
+    const boardMultipliers = [...multipliers, ...activeMultipliers];
+    if (
+      boardMultipliers.some(
+        (multiplier) => multiplier === 7 || multiplier === 12,
+      )
+    ) {
+      soundManager.play("multHigh");
+    } else if (boardMultipliers.some((multiplier) => multiplier > 1)) {
+      soundManager.play("multLow");
+    }
   }
 
   useEffect(
@@ -329,6 +345,8 @@ function Main() {
 
     setHandsState(hiddenHands);
     setIsDrawing(true);
+    setIsResolvingDraw(true);
+    drawRevealDelayRef.current = DRAW_CARD_DELAY_MS;
     remainingCardsByHand.forEach((remainingCards, handIndex) => {
       if (remainingCards === 0) resolveHand(handIndex);
     });
@@ -337,7 +355,9 @@ function Main() {
       const nextCard = cardsToReveal[revealIndex];
       if (nextCard === undefined) {
         dealTimeoutRef.current = null;
+        drawRevealNextRef.current = null;
         setIsDrawing(false);
+        setIsResolvingDraw(false);
         onComplete();
         return;
       }
@@ -360,11 +380,31 @@ function Main() {
       revealIndex += 1;
       dealTimeoutRef.current = window.setTimeout(
         revealNext,
-        DRAW_CARD_DELAY_MS,
+        drawRevealDelayRef.current,
       );
     };
 
+    drawRevealNextRef.current = revealNext;
     revealNext();
+  }
+
+  function handleSpeedUpDraw() {
+    if (
+      !isResolvingDraw ||
+      drawRevealDelayRef.current <= FAST_DRAW_CARD_DELAY_MS
+    ) {
+      return;
+    }
+
+    drawRevealDelayRef.current = FAST_DRAW_CARD_DELAY_MS;
+    if (dealTimeoutRef.current !== null && drawRevealNextRef.current) {
+      window.clearTimeout(dealTimeoutRef.current);
+      dealTimeoutRef.current = window.setTimeout(
+        drawRevealNextRef.current,
+        FAST_DRAW_CARD_DELAY_MS,
+      );
+    }
+    soundManager.play("speedUpDraw");
   }
 
   function getHandResult(
@@ -401,6 +441,7 @@ function Main() {
       return;
     }
 
+    playBoardMultiplierSound();
     setCurrentBet(bet);
     setBalanceCents((balance) => balance - wagerCostCents);
     setDisplayBalanceCents((balance) => balance - wagerCostCents);
@@ -428,8 +469,7 @@ function Main() {
     if (isDeucesWildRankDebug) {
       debugHandsForDrawRef.current =
         DEUCES_WILD_DEBUG_HAND_BATCHES[
-          debugDealBatchRef.current %
-            DEUCES_WILD_DEBUG_HAND_BATCHES.length
+          debugDealBatchRef.current % DEUCES_WILD_DEBUG_HAND_BATCHES.length
         ] ?? null;
       debugDealBatchRef.current += 1;
     } else {
@@ -441,8 +481,10 @@ function Main() {
       const dealtCardIds = isDeucesWildRankDebug
         ? [1, 16, 31, 46, 11]
         : shuffle(CARDS).slice(0, INITIAL_HAND_STATE.length);
-      const dealtHand = dealtCardIds
-        .map((cardId) => ({ cardId, isHeld: false }));
+      const dealtHand = dealtCardIds.map((cardId) => ({
+        cardId,
+        isHeld: false,
+      }));
 
       showInitialCards(dealtHand, () => {
         const initialResult = getHandResult(
@@ -612,6 +654,7 @@ function Main() {
   function handleCardClick(positionIndex: number) {
     if (gameState !== GAME_STATES.Awaiting_Holds || isDrawing) return;
     soundManager.play("hold");
+    setInitialHandResult(null);
     setInitialHand((cards) =>
       cards.map((card, index) =>
         index === positionIndex ? { ...card, isHeld: !card.isHeld } : card,
@@ -719,12 +762,14 @@ function Main() {
             gameName={selectedGame.name}
             canDraw={gameState === GAME_STATES.Awaiting_Holds}
             isDrawing={isDrawing}
+            canSpeedUpDraw={isResolvingDraw}
             onBetChange={changeBet}
             onDeal={handleDeal}
             onDenomClick={() => setActiveModal("denomination")}
             onMenuClick={() => setActiveModal("game-selection")}
             onPaytableClick={() => setActiveModal("paytable")}
             onDraw={handleDraw}
+            onSpeedUpDraw={handleSpeedUpDraw}
             onResetBalance={handleResetBalance}
           />
         }

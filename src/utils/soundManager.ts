@@ -10,8 +10,12 @@ const SOUND_URLS = {
   cate6: "/assets/sounds/cate6r.ogg",
   cate9: "/assets/sounds/cate9r.ogg",
   cate13: "/assets/sounds/cate13r.ogg",
+  multLow: "/assets/sounds/mult_low.ogg",
+  multHigh: "/assets/sounds/mult_high.ogg",
+  speedUpDraw: "/assets/sounds/evltrb25r.ogg",
   creditCount: "/assets/sounds/crdtlp2r.ogg",
   creditCountEnd: "/assets/sounds/lstone2r.ogg",
+  maxBet: "/assets/sounds/mxbet2r.ogg",
 } as const;
 
 type SoundKey = keyof typeof SOUND_URLS;

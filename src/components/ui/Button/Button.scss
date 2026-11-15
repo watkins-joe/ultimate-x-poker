@@ -16,12 +16,16 @@
   border: 1px solid black;
 }
 
-.casino-button:disabled {
+.casino-button:disabled,
+.casino-button.is-visually-disabled {
   background-color: #858585;
   background-image: none;
   box-shadow:
     inset 5px 5px 0 #b8b8b8,
     inset -5px -5px 0 #575757;
   color: #3c3c3c;
+}
+
+.casino-button:disabled {
   cursor: default;
 }

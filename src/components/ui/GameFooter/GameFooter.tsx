@@ -21,9 +21,11 @@ interface GameFooterProps {
   gameName: GameDefinition["name"];
   canDraw: boolean;
   isDrawing: boolean;
+  canSpeedUpDraw: boolean;
   onBetChange: (bet: BetAmount) => void;
   onDeal: (bet?: BetAmount) => void;
   onDraw: () => void;
+  onSpeedUpDraw: () => void;
   onResetBalance: () => void;
   onDenomClick: () => void;
   onMenuClick: () => void;
@@ -47,9 +49,11 @@ function GameFooter({
   gameName,
   canDraw,
   isDrawing,
+  canSpeedUpDraw,
   onBetChange,
   onDeal,
   onDraw,
+  onSpeedUpDraw,
   onResetBalance,
   onDenomClick,
   onMenuClick,
@@ -77,12 +81,14 @@ function GameFooter({
         gameName={gameName}
         canDraw={canDraw}
         isDrawing={isDrawing}
+        canSpeedUpDraw={canSpeedUpDraw}
         onBetChange={onBetChange}
         onDeal={onDeal}
         onDenomClick={onDenomClick}
         onMenuClick={onMenuClick}
         onPaytableClick={onPaytableClick}
         onDraw={onDraw}
+        onSpeedUpDraw={onSpeedUpDraw}
         onResetBalance={onResetBalance}
       />
     </footer>

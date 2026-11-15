@@ -19,9 +19,11 @@ interface ControlsProps {
   gameName: GameDefinition["name"];
   canDraw: boolean;
   isDrawing: boolean;
+  canSpeedUpDraw: boolean;
   onBetChange: (bet: BetAmount) => void;
   onDeal: (bet?: BetAmount) => void;
   onDraw: () => void;
+  onSpeedUpDraw: () => void;
   onResetBalance: () => void;
   onDenomClick: () => void;
   onMenuClick: () => void;
@@ -39,12 +41,14 @@ function Controls({
   gameName,
   canDraw,
   isDrawing,
+  canSpeedUpDraw,
   onBetChange,
   onDeal,
   onDenomClick,
   onMenuClick,
   onPaytableClick,
   onDraw,
+  onSpeedUpDraw,
   onResetBalance,
 }: ControlsProps) {
   const currentBetIndex = BETTING_OPTIONS.indexOf(currentBet);
@@ -90,6 +94,7 @@ function Controls({
           <Button
             disabled={!canChangeBet || !canBetMax}
             text="BET MAX"
+            sound="maxBet"
             onButtonClick={() => {
               const maxBet = BETTING_OPTIONS[BETTING_OPTIONS.length - 1];
               onBetChange(maxBet);
@@ -98,13 +103,18 @@ function Controls({
           />
           <Button
             disabled={
-              isDrawing ||
-              isBetting ||
-              (canDraw ? false : !canDeal || isRoundActive)
+              canSpeedUpDraw
+                ? false
+                : isDrawing ||
+                  isBetting ||
+                  (canDraw ? false : !canDeal || isRoundActive)
             }
-            text={canDraw ? "DRAW" : "DEAL"}
+            text={canDraw || canSpeedUpDraw ? "DRAW" : "DEAL"}
+            visuallyDisabled={canSpeedUpDraw}
             onButtonClick={() => {
-              if (canDraw) {
+              if (canSpeedUpDraw) {
+                onSpeedUpDraw();
+              } else if (canDraw) {
                 onDraw();
               } else {
                 onDeal();

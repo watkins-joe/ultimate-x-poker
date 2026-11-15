@@ -25,6 +25,7 @@ function GameBottomArea({
             : "Set bet to 100 credits to activate Ultimate X"
         }
         className="ultimate-x-indicator"
+        data-sound="maxBet"
         disabled={isUltimateXActive || isRoundActive}
         onClick={onActivateUltimateX}
         type="button"
