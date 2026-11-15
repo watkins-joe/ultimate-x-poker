@@ -11,6 +11,7 @@ const SOUND_URLS = {
   cate9: "/assets/sounds/cate9r.ogg",
   cate13: "/assets/sounds/cate13r.ogg",
   multLow: "/assets/sounds/mult_low.ogg",
+  multMid: "/assets/sounds/mult_mid.ogg",
   multHigh: "/assets/sounds/mult_high.ogg",
   speedUpDraw: "/assets/sounds/evltrb25r.ogg",
   creditCount: "/assets/sounds/crdtlp2r.ogg",

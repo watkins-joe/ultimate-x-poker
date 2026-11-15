@@ -47,9 +47,9 @@ import "./Main.scss";
 
 const DEFAULT_DENOMINATION: Denomination = "25c";
 const STARTING_BALANCE_CENTS = 100_000;
-const DEAL_CARD_DELAY_MS = 100;
-const DRAW_CARD_DELAY_MS = 100;
-const FAST_DRAW_CARD_DELAY_MS = 10;
+const DEAL_CARD_DELAY_MS = 85;
+const DRAW_CARD_DELAY_MS = 85;
+const FAST_DRAW_CARD_DELAY_MS = 25;
 const RESET_CONFIRMATION_TIMEOUT_MS = 5000;
 const BASE_PAYOUT_COUNT_UP_MS = 500;
 const PAYOUT_COUNT_UP_PER_CREDIT_MS = 8;
@@ -191,6 +191,18 @@ function Main() {
 
   function playBoardMultiplierSound() {
     const boardMultipliers = [...multipliers, ...activeMultipliers];
+    if (selectedGameId === "deuces-wild-double-bonus") {
+      const highestMultiplier = Math.max(...boardMultipliers);
+      if (highestMultiplier >= 7) {
+        soundManager.play("multHigh");
+      } else if (highestMultiplier >= 4) {
+        soundManager.play("multMid");
+      } else if (highestMultiplier > 1) {
+        soundManager.play("multLow");
+      }
+      return;
+    }
+
     if (
       boardMultipliers.some(
         (multiplier) => multiplier === 7 || multiplier === 12,
