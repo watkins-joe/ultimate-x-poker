@@ -262,6 +262,7 @@ function Main() {
   function handleSoundVolumeChange(volume: number) {
     setSoundVolume(volume);
     soundManager.setVolume(volume);
+    soundManager.play("click");
   }
 
   function changeBet(amount: BetAmount) {
