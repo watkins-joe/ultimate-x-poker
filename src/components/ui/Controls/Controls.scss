@@ -83,4 +83,18 @@
       color: #ffde02;
     }
   }
+
+  .game-status {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: right;
+    white-space: nowrap;
+    cursor: pointer;
+  }
 }

@@ -28,6 +28,7 @@ interface ControlsProps {
   onDenomClick: () => void;
   onMenuClick: () => void;
   onPaytableClick: () => void;
+  onVolumeClick: () => void;
 }
 
 function Controls({
@@ -47,6 +48,7 @@ function Controls({
   onDenomClick,
   onMenuClick,
   onPaytableClick,
+  onVolumeClick,
   onDraw,
   onSpeedUpDraw,
   onResetBalance,
@@ -133,7 +135,14 @@ function Controls({
         >
           {isResetConfirmationActive ? "ARE YOU SURE?" : gameName}
         </button>
-        <div>{!isRoundActive ? "GAME OVER" : ""}</div>
+        <button
+          aria-label="Open sound volume settings"
+          className="game-status"
+          onClick={onVolumeClick}
+          type="button"
+        >
+          {!isRoundActive ? "GAME OVER" : ""}
+        </button>
       </div>
     </>
   );

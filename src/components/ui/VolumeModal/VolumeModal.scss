@@ -1,0 +1,29 @@
+.volume-modal {
+  width: min(100%, 24rem);
+}
+
+.volume-control {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.5rem 0.25rem 0.25rem;
+
+  &__value {
+    color: #fff1a8;
+    font-family: var(--font-paytable);
+    font-size: 1.35rem;
+  }
+
+  input[type="range"] {
+    width: 100%;
+    accent-color: #ffde02;
+    cursor: pointer;
+  }
+
+  &__limits {
+    display: flex;
+    justify-content: space-between;
+    color: #ffeb00;
+    font-size: 0.8rem;
+  }
+}

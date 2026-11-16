@@ -26,6 +26,8 @@ class SoundManager {
   private readonly buffers = new Map<SoundKey, AudioBuffer>();
   private readonly pendingLoads = new Map<SoundKey, Promise<void>>();
   private readonly loopingSources = new Map<SoundKey, AudioBufferSourceNode>();
+  private masterGain: GainNode | null = null;
+  private volume = 10;
   private isUnlocked = false;
 
   private getContext(): AudioContext {
@@ -73,6 +75,13 @@ class SoundManager {
     );
   }
 
+  setVolume(volume: number): void {
+    this.volume = Math.min(10, Math.max(0, Math.round(volume)));
+    if (this.context) {
+      this.getMasterGain(this.context).gain.value = this.volume / 10;
+    }
+  }
+
   play(key: SoundKey, volume = 0.5): void {
     try {
       const buffer = this.buffers.get(key);
@@ -92,7 +101,7 @@ class SoundManager {
       source.buffer = buffer;
       gain.gain.value = volume;
       source.connect(gain);
-      gain.connect(context.destination);
+      gain.connect(this.getMasterGain(context));
       source.start();
     } catch (error) {
       console.error(`Unable to play sound "${key}".`, error);
@@ -120,7 +129,7 @@ class SoundManager {
       source.loop = true;
       gain.gain.value = volume;
       source.connect(gain);
-      gain.connect(context.destination);
+      gain.connect(this.getMasterGain(context));
       source.start();
       this.loopingSources.set(key, source);
     } catch (error) {
@@ -135,6 +144,15 @@ class SoundManager {
     this.loopingSources.delete(key);
     source.stop();
     source.disconnect();
+  }
+
+  private getMasterGain(context: AudioContext): GainNode {
+    if (this.masterGain) return this.masterGain;
+
+    this.masterGain = context.createGain();
+    this.masterGain.gain.value = this.volume / 10;
+    this.masterGain.connect(context.destination);
+    return this.masterGain;
   }
 
   private async preload(key: SoundKey): Promise<void> {

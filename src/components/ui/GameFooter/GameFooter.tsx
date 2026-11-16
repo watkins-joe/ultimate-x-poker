@@ -30,6 +30,7 @@ interface GameFooterProps {
   onDenomClick: () => void;
   onMenuClick: () => void;
   onPaytableClick: () => void;
+  onVolumeClick: () => void;
 }
 
 function GameFooter({
@@ -58,6 +59,7 @@ function GameFooter({
   onDenomClick,
   onMenuClick,
   onPaytableClick,
+  onVolumeClick,
 }: GameFooterProps) {
   return (
     <footer className="game-footer">
@@ -87,6 +89,7 @@ function GameFooter({
         onDenomClick={onDenomClick}
         onMenuClick={onMenuClick}
         onPaytableClick={onPaytableClick}
+        onVolumeClick={onVolumeClick}
         onDraw={onDraw}
         onSpeedUpDraw={onSpeedUpDraw}
         onResetBalance={onResetBalance}

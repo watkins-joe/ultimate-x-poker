@@ -28,6 +28,11 @@ import {
   saveDenomination,
   saveSelectedGame,
 } from "../../../utils/balanceStorage";
+import {
+  DEFAULT_SOUND_VOLUME,
+  loadSoundVolume,
+  saveSoundVolume,
+} from "../../../utils/volumeStorage";
 import { CARDS, shuffle } from "../../../utils/cards";
 import { DEUCES_WILD_DEBUG_HAND_BATCHES } from "../../../utils/deucesWildDebugHands";
 import { soundManager } from "../../../utils/soundManager";
@@ -44,6 +49,7 @@ import InteractiveHand, {
   type HandResult,
 } from "../InteractiveHand/InteractiveHand";
 import PaytableModal from "../Paytable/PaytableModal";
+import VolumeModal from "../VolumeModal/VolumeModal";
 import "./Main.scss";
 
 const DEFAULT_DENOMINATION: Denomination = "25c";
@@ -84,8 +90,18 @@ function getInitialGame(): GameId {
   }
 }
 
+function getInitialSoundVolume(): number {
+  try {
+    return loadSoundVolume(window.localStorage);
+  } catch (error) {
+    console.error("Unable to load the saved sound volume.", error);
+    return DEFAULT_SOUND_VOLUME;
+  }
+}
+
 function Main() {
   const [isCreditsMode, setIsCreditsMode] = useState(true);
+  const [soundVolume, setSoundVolume] = useState(getInitialSoundVolume);
   const [gameData, dispatch] = useReducer(
     gameDataReducer,
     null,
@@ -117,7 +133,7 @@ function Main() {
     isCountingPayout,
   } = gameData;
   const [activeModal, setActiveModal] = useState<
-    "denomination" | "game-selection" | "paytable" | null
+    "denomination" | "game-selection" | "paytable" | "volume" | null
   >(null);
   const dealTimeoutRef = useRef<number | null>(null);
   const drawRevealNextRef = useRef<(() => void) | null>(null);
@@ -233,6 +249,20 @@ function Main() {
       console.error("Unable to save the selected game.", error);
     }
   }, [selectedGameId]);
+
+  useEffect(() => {
+    soundManager.setVolume(soundVolume);
+    try {
+      saveSoundVolume(window.localStorage, soundVolume);
+    } catch (error) {
+      console.error("Unable to save the sound volume.", error);
+    }
+  }, [soundVolume]);
+
+  function handleSoundVolumeChange(volume: number) {
+    setSoundVolume(volume);
+    soundManager.setVolume(volume);
+  }
 
   function changeBet(amount: BetAmount) {
     if (isRoundActive) return;
@@ -639,6 +669,13 @@ function Main() {
   return (
     <div className="main-container">
       <header className="app-version">v{__APP_VERSION__}</header>
+      {activeModal === "volume" && (
+        <VolumeModal
+          volume={soundVolume}
+          onClose={() => setActiveModal(null)}
+          onVolumeChange={handleSoundVolumeChange}
+        />
+      )}
       {activeModal === "denomination" && (
         <DenomModal
           selectedDenomination={denomination}
@@ -712,6 +749,7 @@ function Main() {
             onDenomClick={() => setActiveModal("denomination")}
             onMenuClick={() => setActiveModal("game-selection")}
             onPaytableClick={() => setActiveModal("paytable")}
+            onVolumeClick={() => setActiveModal("volume")}
             onDraw={handleDraw}
             onSpeedUpDraw={handleSpeedUpDraw}
             onResetBalance={handleResetBalance}
