@@ -35,6 +35,9 @@ import {
 } from "../../../utils/volumeStorage";
 import { CARDS, shuffle } from "../../../utils/cards";
 import { DEUCES_WILD_DEBUG_HAND_BATCHES } from "../../../utils/deucesWildDebugHands";
+import {
+  FOUR_ACES_WITH_ANY_TWO_THREE_FOUR_DEBUG_HAND,
+} from "../../../utils/doubleDoubleBonusDebugHands";
 import { soundManager } from "../../../utils/soundManager";
 import {
   createGameDataState,
@@ -168,6 +171,9 @@ function Main() {
   const isDeucesWildRankDebug =
     new URLSearchParams(window.location.search).get("debug") ===
       "deuces-wild-ranks" && selectedGameId === "deuces-wild-double-bonus";
+  const isFourAcesDebug =
+    new URLSearchParams(window.location.search).get("debug") ===
+      "four-aces" && selectedGameId === "double-double-bonus";
   const activeHandCount = isDeucesWildRankDebug
     ? MULTI_HAND_COUNT
     : getActiveHandCount(currentBet);
@@ -474,9 +480,11 @@ function Main() {
 
     const dealCards = () => {
       dispatch({ type: "deal-betting-finished" });
-      const dealtCardIds = isDeucesWildRankDebug
-        ? [1, 16, 31, 46, 11]
-        : shuffle(CARDS).slice(0, INITIAL_HAND_STATE.length);
+      const dealtCardIds = isFourAcesDebug
+        ? FOUR_ACES_WITH_ANY_TWO_THREE_FOUR_DEBUG_HAND
+        : isDeucesWildRankDebug
+          ? [1, 16, 31, 46, 11]
+          : shuffle(CARDS).slice(0, INITIAL_HAND_STATE.length);
       const dealtHand = dealtCardIds.map((cardId) => ({
         cardId,
         isHeld: false,
