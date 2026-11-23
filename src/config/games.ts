@@ -11,8 +11,15 @@ import {
   PAYOUTS_PER_BET,
 } from "./doubleDoubleBonusConfig";
 import type { BaseBetAmount } from "./gameConfig";
+import {
+  TRIPLE_DOUBLE_BONUS_HAND_DISPLAY_NAMES,
+  TRIPLE_DOUBLE_BONUS_PAYOUTS_PER_BET,
+} from "./tripleDoubleBonusConfig";
 
-export type GameId = "double-double-bonus" | "deuces-wild-double-bonus";
+export type GameId =
+  | "double-double-bonus"
+  | "deuces-wild-double-bonus"
+  | "triple-double-bonus";
 export type HandRank = string;
 export type GamePayoutTable = Readonly<
   Record<BaseBetAmount, Readonly<Record<HandRank, number>>>
@@ -67,6 +74,30 @@ export const GAMES: Record<GameId, GameDefinition> = {
       [HAND_TYPES.FOUR_ACES]: 4,
       [HAND_TYPES.FOUR_TWOS_THREE_FOURS]: 4,
       [HAND_TYPES.FOUR_FIVES_THRU_KINGS]: 3,
+      [HAND_TYPES.FULL_HOUSE]: 12,
+      [HAND_TYPES.FLUSH]: 10,
+      [HAND_TYPES.STRAIGHT]: 8,
+      [HAND_TYPES.THREE_OF_A_KIND]: 4,
+      [HAND_TYPES.TWO_PAIR]: 3,
+      [HAND_TYPES.JACKS_OR_BETTER]: 2,
+    },
+    evaluateHand: evaluateDoubleDoubleBonusHand,
+    getCardAsset: getStandardCardAsset,
+  },
+  "triple-double-bonus": {
+    id: "triple-double-bonus",
+    name: "TRIPLE DBL BONUS",
+    image: "TDB.png",
+    handNames: TRIPLE_DOUBLE_BONUS_HAND_DISPLAY_NAMES,
+    payoutsPerBet: TRIPLE_DOUBLE_BONUS_PAYOUTS_PER_BET,
+    multiplierByHand: {
+      [HAND_TYPES.ROYAL_FLUSH]: 2,
+      [HAND_TYPES.FOUR_ACES_WITH_ANY_TWO_THREE_FOUR]: 2,
+      [HAND_TYPES.FOUR_TWOS_THREE_FOURS_WITH_ACE_TWO_THREE_FOUR]: 2,
+      [HAND_TYPES.FOUR_ACES]: 2,
+      [HAND_TYPES.FOUR_TWOS_THREE_FOURS]: 2,
+      [HAND_TYPES.FOUR_FIVES_THRU_KINGS]: 2,
+      [HAND_TYPES.STRAIGHT_FLUSH]: 2,
       [HAND_TYPES.FULL_HOUSE]: 12,
       [HAND_TYPES.FLUSH]: 10,
       [HAND_TYPES.STRAIGHT]: 8,
