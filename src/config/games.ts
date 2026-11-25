@@ -15,11 +15,18 @@ import {
   TRIPLE_DOUBLE_BONUS_HAND_DISPLAY_NAMES,
   TRIPLE_DOUBLE_BONUS_PAYOUTS_PER_BET,
 } from "./tripleDoubleBonusConfig";
+import {
+  LOOSE_DEUCES_HAND_DISPLAY_NAMES,
+  LOOSE_DEUCES_MULTIPLIER_BY_HAND,
+  LOOSE_DEUCES_PAYOUTS_PER_BET,
+} from "./looseDeucesConfig";
+import { evaluateLooseDeucesHand } from "../utils/evaluateLooseDeucesHand";
 
 export type GameId =
   | "double-double-bonus"
   | "deuces-wild-double-bonus"
-  | "triple-double-bonus";
+  | "triple-double-bonus"
+  | "loose-deuces";
 export type HandRank = string;
 export type GamePayoutTable = Readonly<
   Record<BaseBetAmount, Readonly<Record<HandRank, number>>>
@@ -130,6 +137,16 @@ export const GAMES: Record<GameId, GameDefinition> = {
       [DEUCES_WILD_HAND_TYPES.THREE_OF_A_KIND]: 4,
     },
     evaluateHand: evaluateDeucesWildHand,
+    getCardAsset: getDeucesWildCardAsset,
+  },
+  "loose-deuces": {
+    id: "loose-deuces",
+    name: "LOOSE DEUCES",
+    image: "LD.png",
+    handNames: LOOSE_DEUCES_HAND_DISPLAY_NAMES,
+    payoutsPerBet: LOOSE_DEUCES_PAYOUTS_PER_BET,
+    multiplierByHand: LOOSE_DEUCES_MULTIPLIER_BY_HAND,
+    evaluateHand: evaluateLooseDeucesHand,
     getCardAsset: getDeucesWildCardAsset,
   },
 };

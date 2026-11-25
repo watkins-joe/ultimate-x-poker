@@ -1,6 +1,7 @@
 import type { PointerEvent as ReactPointerEvent } from "react";
 import { DEUCES_WILD_HAND_TYPES } from "../../../config/deucesWildConfig";
 import { HAND_TYPES } from "../../../config/doubleDoubleBonusConfig";
+import { LOOSE_DEUCES_HAND_TYPES } from "../../../config/looseDeucesConfig";
 import type { GameDefinition, HandRank } from "../../../config/games";
 import type { INITIAL_HAND_STATE_TYPE } from "../../../config/hands";
 import "./InteractiveHand.scss";
@@ -27,6 +28,16 @@ const WINNING_HAND_ACCENTS: Readonly<Record<HandRank, string>> = {
   [DEUCES_WILD_HAND_TYPES.FIVE_THREES_FOURS_FIVES]: "burgundy",
   [DEUCES_WILD_HAND_TYPES.FIVE_SIXES_THRU_KINGS]: "burgundy",
   [DEUCES_WILD_HAND_TYPES.FOUR_OF_A_KIND]: "burgundy",
+  [LOOSE_DEUCES_HAND_TYPES.ROYAL_FLUSH]: "orange",
+  [LOOSE_DEUCES_HAND_TYPES.FOUR_DEUCES]: "burgundy",
+  [LOOSE_DEUCES_HAND_TYPES.WILD_ROYAL_FLUSH]: "orange",
+  [LOOSE_DEUCES_HAND_TYPES.FIVE_OF_A_KIND]: "burgundy",
+  [LOOSE_DEUCES_HAND_TYPES.STRAIGHT_FLUSH]: "pink",
+  [LOOSE_DEUCES_HAND_TYPES.FOUR_OF_A_KIND]: "burgundy",
+  [LOOSE_DEUCES_HAND_TYPES.FULL_HOUSE]: "blue",
+  [LOOSE_DEUCES_HAND_TYPES.FLUSH]: "green",
+  [LOOSE_DEUCES_HAND_TYPES.STRAIGHT]: "yellow",
+  [LOOSE_DEUCES_HAND_TYPES.THREE_OF_A_KIND]: "yellow",
 };
 
 export interface HandResult {
